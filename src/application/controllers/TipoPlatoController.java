@@ -20,7 +20,7 @@ public class TipoPlatoController {
 
         if (tiposPlato.size() <= 0) {
             IndexTiposPlato.lblErrorMsg.setVisible(true);
-            Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "No hay tipos de platos creados");
+            Notifications.getInstance().show(Notifications.Type.INFO, Notifications.Location.TOP_RIGHT, "No hay tipos de platos creados");
         }else{
             IndexTiposPlato.lblErrorMsg.setVisible(false);
         }
@@ -38,9 +38,19 @@ public class TipoPlatoController {
         List<TipoPlato> tiposPlato = Restaurante.buscarTiposPlato(query);
         
         if (tiposPlato.size() <= 0) {
-            Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "No hay coincidencias");
+            Notifications.getInstance().show(Notifications.Type.INFO, Notifications.Location.TOP_RIGHT, "No hay coincidencias");
         }
         
         return new TipoPlatoTableModel(tiposPlato);
+    }
+    
+    //Método para eliminar un tipo de plato
+    public ResultadoOperacion delTipo(int id){
+        return Restaurante.eliminarTipoPlato(id);
+    }
+    
+    //Método para buscar un tipo de plato
+    public ResultadoOperacion modTipo(int id, String nombre){
+        return Restaurante.modificarTipoPlato(id, nombre);
     }
 }

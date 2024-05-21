@@ -79,13 +79,21 @@ public class Restaurante {
 
             if (nombreProducto.isEmpty()) {
                 return new ResultadoOperacion(false, "El nombre del producto no puede estar vacio");
+            } else if (cantidadProducto < 0) {
+                return new ResultadoOperacion(false, "La cantidad no puede ser menor a cero");
             }
 
             Producto productoNuevo = new Producto(id, nombreProducto, cantidadProducto);
 
-            //Validamos que él producto no exista
-            if (inventario.contains(productoNuevo)) {
-                return new ResultadoOperacion(false, "¡El producto ya se encuentra registrado, si desea añadir más cantidad de él modifiqulo!");
+            //Validamos que el nombre del producto no este ya dentro
+            for (Producto producto : inventario) {
+                if (producto.fueBorrado()) {
+                    continue;
+                }
+
+                if (producto.getNombreProducto().equals(nombreProducto)) {
+                    return new ResultadoOperacion(false, "¡El producto ya se encuentra registrado, si desea añadir más cantidad de él modifiqulo!");
+                }
             }
 
             //Ya que el producto no se ha registrado, entonces lo añadiremos al arreglo
@@ -119,11 +127,19 @@ public class Restaurante {
 
             if (nombre.isEmpty()) {
                 return new ResultadoOperacion(false, "El nombre del producto no puede estar vacio");
+            } else if (cantidad <= 0) {
+                return new ResultadoOperacion(false, "La cantidad nueva a añadir no puede ser menor o igual a 0");
             }
 
-            Producto pruebaNombre = new Producto(id, nombre, cantidad);
-            if (inventario.contains(pruebaNombre)) {
-                return new ResultadoOperacion(false, "¡El producto ya se encuentra registrado, si desea añadir más cantidad de él modifiqulo!");
+            //Validamos que el nombre del producto no este ya dentro
+            for (Producto producto : inventario) {
+                if (producto.fueBorrado()) {
+                    continue;
+                }
+
+                if (producto.getNombreProducto().equals(nombre) && producto.getIdProducto() != id) {
+                    return new ResultadoOperacion(false, "¡El producto ya se encuentra registrado, si desea añadir más cantidad de él modifiqulo!");
+                }
             }
 
             productoAModificar.setNombreProducto(nombre);
@@ -180,7 +196,7 @@ public class Restaurante {
         nombre = nombre.trim().toLowerCase();
         List<Producto> coincidencias = new ArrayList<>();
         for (Producto producto : inventario) {
-            if (producto.getNombreProducto().toLowerCase().contains(nombre)) {
+            if (producto.getNombreProducto().toLowerCase().contains(nombre) && !producto.fueBorrado()) {
                 coincidencias.add(producto);
             }
         }
@@ -325,7 +341,7 @@ public class Restaurante {
      */
     public static ResultadoOperacion eliminarPromocion(int id) {
         try {
-            promociones.remove(id);
+            promociones.remove(id - 1);
             return new ResultadoOperacion(true, "¡La promoción ha sido eliminada con éxito!");
         } catch (IndexOutOfBoundsException e) {
             return new ResultadoOperacion(false, """
@@ -427,12 +443,12 @@ public class Restaurante {
 
             //Validamos que no exista
             if (tiposPlato.contains(tipoPrueba)) {
-                return new ResultadoOperacion(false, "¡El tipo de plato ya se encuentra registrada!");
+                return new ResultadoOperacion(false, "¡El tipo de plato ya se encuentra registrado!");
             }
 
             tipoAModificar.setNombreTipoPlato(nombre);
 
-            return new ResultadoOperacion(true, "¡El tipo de plato ha sido modificada con exito!");
+            return new ResultadoOperacion(true, "¡El tipo de plato ha sido modificado con exito!");
         } catch (IndexOutOfBoundsException e) {
             return new ResultadoOperacion(false, """
                                                   ¡Error al actualizar el tipo de plato!
@@ -451,7 +467,7 @@ public class Restaurante {
      */
     public static ResultadoOperacion eliminarTipoPlato(int id) {
         try {
-            tiposPlato.get(id).setDisponibilidad(false);
+            tiposPlato.get(id - 1).setDisponibilidad(false);
             return new ResultadoOperacion(true, "¡La promoción ha sido eliminada con éxito!");
         } catch (IndexOutOfBoundsException e) {
             return new ResultadoOperacion(false, """
@@ -475,7 +491,7 @@ public class Restaurante {
         List<TipoPlato> coincidencias = new ArrayList<>();
 
         for (TipoPlato tipo : tiposPlato) {
-            if (tipo.getNombreTipoPlato().toLowerCase().contains(query)) {
+            if (tipo.getNombreTipoPlato().toLowerCase().contains(query) && tipo.isDisponibilidad()) {
                 coincidencias.add(tipo);
             }
         }
@@ -496,8 +512,8 @@ public class Restaurante {
 
         return null;
     }
-    
-    public static List<TipoPlato> obtenerTiposPlatoDisponibles(){
+
+    public static List<TipoPlato> obtenerTiposPlatoDisponibles() {
         List<TipoPlato> coincidencias = new ArrayList<>();
 
         for (TipoPlato tipo : tiposPlato) {
@@ -505,7 +521,7 @@ public class Restaurante {
                 coincidencias.add(tipo);
             }
         }
-        
+
         return coincidencias;
     }
 
@@ -600,7 +616,7 @@ public class Restaurante {
      */
     public static ResultadoOperacion eliminarPlato(int id) {
         try {
-            tiposPlato.remove(id);
+            tiposPlato.remove(id - 1);
             return new ResultadoOperacion(true, "¡El plato ha sido eliminado con éxito!");
         } catch (IndexOutOfBoundsException e) {
             return new ResultadoOperacion(false, """
@@ -659,7 +675,7 @@ public class Restaurante {
      * @param pedido representa el plato a añadir
      * @return
      */
-    public static ResultadoOperacion agregarPlato(Pedido pedido) {
+    public static ResultadoOperacion agregarPedido(Pedido pedido) {
         //Validamos que el nombre del producto no exista
         try {
             int id = pedidos.size() + 1;
@@ -731,7 +747,7 @@ public class Restaurante {
      */
     public static ResultadoOperacion eliminarPedido(int id) {
         try {
-            pedidos.remove(id);
+            pedidos.remove(id - 1);
             return new ResultadoOperacion(true, "¡El pedido ha sido eliminado con éxito!");
         } catch (IndexOutOfBoundsException e) {
             return new ResultadoOperacion(false, """
@@ -845,10 +861,10 @@ public class Restaurante {
         return pedidos.stream()
                 .reduce(0, (total, pedido) -> pedido.getEstadoPedido() == EstadoPedido.PAGADO ? total + 1 : total, Integer::sum);
     }
-    
+
     //Métod para obtener el costo total de cada pedido pagado
     public static double totalVentas() {
         return pedidos.stream()
-                      .reduce(0.0, (total, pedido) -> pedido.getEstadoPedido() == EstadoPedido.PAGADO ? total + pedido.getTotal() : total, Double::sum);
+                .reduce(0.0, (total, pedido) -> pedido.getEstadoPedido() == EstadoPedido.PAGADO ? total + pedido.getTotal() : total, Double::sum);
     }
 }

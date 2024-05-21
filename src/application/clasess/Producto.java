@@ -44,20 +44,23 @@ public class Producto {
         this.cantidadProducto = cantidadProducto;
     }
 
-    /**
-     * Método para saber si dos objetos de producto son igual
-     * @param obj que representa el objeto a ser evaluado
-     * @return {boolean} que representa si el objeto es igual o no es igual
-     */
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 11 * hash + Objects.hashCode(this.nombreProducto);
+        return hash;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
         
-        if(this.cantidadProducto == -1){//Validando que no se halla eliminado
+        if(this.fueBorrado()){
             return false;
         }
+        
         if (obj == null) {
             return false;
         }
@@ -68,12 +71,7 @@ public class Producto {
         return Objects.equals(this.nombreProducto, other.nombreProducto);
     }
 
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 97 * hash + Objects.hashCode(this.nombreProducto);
-        return hash;
-    }
+    
     
     /**
      * Método que valida que el producto posee existencias y esta disponible para ser usado

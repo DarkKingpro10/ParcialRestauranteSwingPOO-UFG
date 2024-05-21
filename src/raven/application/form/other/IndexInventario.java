@@ -4,36 +4,34 @@
  */
 package raven.application.form.other;
 
-import application.controllers.TipoPlatoController;
-import application.tablesModel.TipoPlatoTableModel;
+import application.controllers.ProductoController;
+import application.tablesModel.InventarioTableModel;
 import application.utils.CentrarColumnas;
 import application.utils.ResultadoOperacion;
 import application.utils.Validaciones;
 import com.formdev.flatlaf.FlatClientProperties;
 import javax.swing.JComponent;
-import javax.swing.UIManager;
-import net.miginfocom.swing.MigLayout;
 import raven.toast.Notifications;
 
 /**
  *
  * @author Jesus Esquivel
  */
-public class IndexTiposPlato extends javax.swing.JPanel {
+public class IndexInventario extends javax.swing.JPanel {
 
     //Atributos de la clase
-    int idTipoPlato;
+    int idProducto;
     //Importando las clases
     Validaciones validaciones = new Validaciones();
-    TipoPlatoController controller = new TipoPlatoController();
+    ProductoController controller = new ProductoController();
 
     /**
      * Creates new form IndexTiposPlato
      */
-    public IndexTiposPlato() {
+    public IndexInventario() {
         initComponents();
         inicializarCampos();
-        cargarTabla(controller.obtenerTiposPlato());
+        cargarTabla(controller.obtenerProductos());
     }
 
     //Método para inicializar la vista
@@ -42,28 +40,30 @@ public class IndexTiposPlato extends javax.swing.JPanel {
         lb.putClientProperty(FlatClientProperties.STYLE, ""
                 + "font:$h1.font");
         lblErrorMsg.setVisible(false);
-        txtTipo.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ingrese el tipo de plato a buscar o añadir");
-
+        txtNombre.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ingrese el nombre del producto");
+        txtCantidad.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ingrese la cantidad del producto a añadir");
         //Aplicando validaciones
-        JComponent[] componentesAValidar = {txtTipo};
+        JComponent[] componentesAValidar = {txtNombre, txtCantidad};
         validaciones.noPegar(componentesAValidar);
-        tblTipos.setDefaultRenderer(Object.class, new CentrarColumnas());
+        tblProductos.setDefaultRenderer(Object.class, new CentrarColumnas());
     }
 
     //Método para cargar la tabla
-    void cargarTabla(TipoPlatoTableModel model) {
-        tblTipos.setModel(model);
+    void cargarTabla(InventarioTableModel model) {
+        tblProductos.setModel(model);
     }
 
     //Método para reiniciar el formulario
     void reiniciarForm() {
-        txtTipo.setText("");
-        idTipoPlato = 0;
+        txtNombre.setText("");
+        txtCantidad.setText("");
+        idProducto = 0;
     }
 
     //Deshabilitar el formulario
     void toggleEnableForm() {
-        txtTipo.setEnabled(!txtTipo.isEnabled());
+        txtNombre.setEnabled(!txtNombre.isEnabled());
+        txtCantidad.setEnabled(!txtCantidad.isEnabled());
         btnAdd.setEnabled(!btnAdd.isEnabled());
         btnDel.setEnabled(!btnDel.isEnabled());
         btnMod.setEnabled(!btnMod.isEnabled());
@@ -88,19 +88,22 @@ public class IndexTiposPlato extends javax.swing.JPanel {
         lblErrorMsg = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
-        txtTipo = new javax.swing.JTextField();
+        txtNombre = new javax.swing.JTextField();
         btnBuscar = new javax.swing.JButton();
         lbUser = new javax.swing.JLabel();
+        lbUser1 = new javax.swing.JLabel();
+        txtCantidad = new javax.swing.JTextField();
+        jButton1 = new javax.swing.JButton();
         jPanel4 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        tblTipos = new javax.swing.JTable();
+        tblProductos = new javax.swing.JTable();
 
         setPreferredSize(new java.awt.Dimension(806, 460));
 
         jPanel1.setLayout(new java.awt.BorderLayout());
 
         lb.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lb.setText("Gestion de los tipos de platos");
+        lb.setText("Inventario");
         jPanel1.add(lb, java.awt.BorderLayout.PAGE_START);
 
         btnDel.setBackground(javax.swing.UIManager.getDefaults().getColor("Actions.Red"));
@@ -165,13 +168,11 @@ public class IndexTiposPlato extends javax.swing.JPanel {
 
         lblErrorMsg.setForeground(javax.swing.UIManager.getDefaults().getColor("Component.custom.borderColor"));
         lblErrorMsg.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblErrorMsg.setText("No hay tipos de platos añadidos");
+        lblErrorMsg.setText("No hay productos/ingredientes añadidos");
 
-        jPanel2.setLayout(new java.awt.GridLayout(1, 2));
-
-        txtTipo.addKeyListener(new java.awt.event.KeyAdapter() {
+        txtNombre.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
-                txtTipoKeyTyped(evt);
+                txtNombreKeyTyped(evt);
             }
         });
 
@@ -186,37 +187,66 @@ public class IndexTiposPlato extends javax.swing.JPanel {
             }
         });
 
-        lbUser.setText("Tipo de plato");
+        lbUser.setText("Nombre Producto");
+
+        lbUser1.setText("Cantidad del producto");
+
+        txtCantidad.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtCantidadKeyTyped(evt);
+            }
+        });
+
+        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/raven/icon/png/reload-icon.png"))); // NOI18N
+        jButton1.setToolTipText("Recargar la Tabla");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap(35, Short.MAX_VALUE)
+                .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lbUser, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtTipo, javax.swing.GroupLayout.PREFERRED_SIZE, 333, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGap(45, 45, 45)
-                        .addComponent(btnBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(35, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(lbUser, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(txtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(80, 80, 80)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(lbUser1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(txtCantidad, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                        .addComponent(jButton1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap(35, Short.MAX_VALUE)
-                .addComponent(lbUser)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtTipo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(68, 68, 68)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lbUser1)
+                    .addComponent(lbUser))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtCantidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
                 .addComponent(btnBuscar)
-                .addContainerGap(131, Short.MAX_VALUE))
+                .addContainerGap(11, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(jButton1))
         );
 
-        jPanel2.add(jPanel3);
-
-        tblTipos.setModel(new javax.swing.table.DefaultTableModel(
+        tblProductos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -224,36 +254,54 @@ public class IndexTiposPlato extends javax.swing.JPanel {
 
             }
         ));
-        tblTipos.addMouseListener(new java.awt.event.MouseAdapter() {
+        tblProductos.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                tblTiposMouseClicked(evt);
+                tblProductosMouseClicked(evt);
             }
         });
-        jScrollPane1.setViewportView(tblTipos);
+        jScrollPane1.setViewportView(tblProductos);
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 391, Short.MAX_VALUE)
-                .addContainerGap())
+            .addGap(0, 0, Short.MAX_VALUE)
+            .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel4Layout.createSequentialGroup()
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 806, Short.MAX_VALUE)
+                    .addContainerGap()))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 303, Short.MAX_VALUE))
+            .addGap(0, 181, Short.MAX_VALUE)
+            .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel4Layout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 169, Short.MAX_VALUE)
+                    .addContainerGap()))
         );
 
-        jPanel2.add(jPanel4);
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, 181, Short.MAX_VALUE)
+                .addContainerGap())
+        );
 
         javax.swing.GroupLayout pnlCentralLayout = new javax.swing.GroupLayout(pnlCentral);
         pnlCentral.setLayout(pnlCentralLayout);
         pnlCentralLayout.setHorizontalGroup(
             pnlCentralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(lblErrorMsg, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(lblErrorMsg, javax.swing.GroupLayout.DEFAULT_SIZE, 806, Short.MAX_VALUE)
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         pnlCentralLayout.setVerticalGroup(
@@ -261,7 +309,8 @@ public class IndexTiposPlato extends javax.swing.JPanel {
             .addGroup(pnlCentralLayout.createSequentialGroup()
                 .addComponent(lblErrorMsg, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         jPanel1.add(pnlCentral, java.awt.BorderLayout.CENTER);
@@ -280,28 +329,35 @@ public class IndexTiposPlato extends javax.swing.JPanel {
 
     private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
         //Ejecutamos el método de busqueda
-        if (txtTipo.getText().trim().isBlank()) {
-            cargarTabla(controller.obtenerTiposPlato());
+        if (txtNombre.getText().trim().isBlank()) {
+            cargarTabla(controller.obtenerProductos());
         } else {
-            cargarTabla(controller.buscarTipos(txtTipo.getText()));
+            cargarTabla(controller.buscarProductos(txtNombre.getText()));
         }
     }//GEN-LAST:event_btnBuscarActionPerformed
 
-    private void txtTipoKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtTipoKeyTyped
+    private void txtNombreKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtNombreKeyTyped
         //Validamos que solo acepte letras
-        validaciones.soloLetras(evt, 2, txtTipo.getText());
-    }//GEN-LAST:event_txtTipoKeyTyped
+        validaciones.soloLetras(evt, 2, txtNombre.getText());
+    }//GEN-LAST:event_txtNombreKeyTyped
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         //Deshabilitamos los botones
         toggleEnableForm();
         //Ejecutamos método
-        ResultadoOperacion res = controller.addTipo(txtTipo.getText().trim());
+
+        if (txtCantidad.getText().trim().isBlank()) {
+            Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "No pueden haber campos vacios en el formulario");
+            toggleEnableForm();
+            return;
+        }
+
+        ResultadoOperacion res = controller.addProducto(txtNombre.getText().trim(), Integer.valueOf(txtCantidad.getText().trim()));
 
         //Evaluamos la respuesta
         if (res.isExito()) {
             Notifications.getInstance().show(Notifications.Type.SUCCESS, Notifications.Location.TOP_RIGHT, res.getMensaje());
-            cargarTabla(controller.obtenerTiposPlato());
+            cargarTabla(controller.obtenerProductos());
             reiniciarForm();
         } else {
             Notifications.getInstance().show(Notifications.Type.ERROR, Notifications.Location.TOP_RIGHT, res.getMensaje());
@@ -313,13 +369,13 @@ public class IndexTiposPlato extends javax.swing.JPanel {
     private void btnDelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDelActionPerformed
         //Eliminar el tipo plato
         toggleEnableForm();
-        int row = tblTipos.getSelectedRow();
-        if (row != -1 && idTipoPlato > 0) {
-            ResultadoOperacion res = controller.delTipo(idTipoPlato);
+        int row = tblProductos.getSelectedRow();
+        if (row != -1 && idProducto > 0) {
+            ResultadoOperacion res = controller.delProducto(idProducto);
 
             if (res.isExito()) {
                 Notifications.getInstance().show(Notifications.Type.SUCCESS, Notifications.Location.TOP_RIGHT, res.getMensaje());
-                cargarTabla(controller.obtenerTiposPlato());
+                cargarTabla(controller.obtenerProductos());
                 reiniciarForm();
             } else {
                 Notifications.getInstance().show(Notifications.Type.ERROR, Notifications.Location.TOP_RIGHT, res.getMensaje());
@@ -327,30 +383,36 @@ public class IndexTiposPlato extends javax.swing.JPanel {
         } else {
             Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe seleccionar un tipo de plato");
         }
-        
+
         toggleEnableForm();
     }//GEN-LAST:event_btnDelActionPerformed
 
-    private void tblTiposMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblTiposMouseClicked
+    private void tblProductosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblProductosMouseClicked
         //Llenamos el formulario
-        int row = tblTipos.getSelectedRow();
-        txtTipo.setText(tblTipos.getValueAt(row, 0).toString());
+        int row = tblProductos.getSelectedRow();
+        txtNombre.setText(tblProductos.getValueAt(row, 0).toString());
         //Obtenemos el modelo de la tabla
-        TipoPlatoTableModel model = (TipoPlatoTableModel) tblTipos.getModel();
+        InventarioTableModel model = (InventarioTableModel) tblProductos.getModel();
         //Seteamos el id del tipo seleccionado
-        idTipoPlato = model.getIdAt(row);
-    }//GEN-LAST:event_tblTiposMouseClicked
+        idProducto = model.getIdAt(row);
+    }//GEN-LAST:event_tblProductosMouseClicked
 
     private void btnModActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModActionPerformed
         //Modificar el tipo de plato
         toggleEnableForm(); //Deshabilitamos los botones
-        int row = tblTipos.getSelectedRow(); //Obtenemos la fila seleccionada
-        if (row != -1 && idTipoPlato > 0) {
-            ResultadoOperacion res = controller.modTipo(idTipoPlato, txtTipo.getText().trim());//Ejecutamos la operación
+        int row = tblProductos.getSelectedRow(); //Obtenemos la fila seleccionada
+        if (row != -1 && idProducto > 0) {
+            if (txtCantidad.getText().trim().isBlank()) {
+                Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "No pueden haber campos vacios en el formulario");
+                toggleEnableForm();
+                return;
+            }
+
+            ResultadoOperacion res = controller.modProducto(idProducto, txtNombre.getText().trim(), Integer.valueOf(txtCantidad.getText().trim()));//Ejecutamos la operación
 
             if (res.isExito()) {
                 Notifications.getInstance().show(Notifications.Type.SUCCESS, Notifications.Location.TOP_RIGHT, res.getMensaje());
-                cargarTabla(controller.obtenerTiposPlato());
+                cargarTabla(controller.obtenerProductos());
                 reiniciarForm();
             } else {
                 Notifications.getInstance().show(Notifications.Type.ERROR, Notifications.Location.TOP_RIGHT, res.getMensaje());
@@ -358,15 +420,25 @@ public class IndexTiposPlato extends javax.swing.JPanel {
         } else {
             Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe seleccionar un tipo de plato");
         }
-        
+
         toggleEnableForm();
     }//GEN-LAST:event_btnModActionPerformed
+
+    private void txtCantidadKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCantidadKeyTyped
+        validaciones.soloNumeros(evt, 1, txtCantidad.getText());
+    }//GEN-LAST:event_txtCantidadKeyTyped
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        reiniciarForm();
+        cargarTabla(controller.obtenerProductos());
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnBuscar;
     private javax.swing.JButton btnDel;
     private javax.swing.JButton btnMod;
+    private javax.swing.JButton jButton1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -374,10 +446,12 @@ public class IndexTiposPlato extends javax.swing.JPanel {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lb;
     private javax.swing.JLabel lbUser;
+    private javax.swing.JLabel lbUser1;
     public static javax.swing.JLabel lblErrorMsg;
     private javax.swing.JPanel pnlCentral;
     private javax.swing.JPanel pnlFooter;
-    private javax.swing.JTable tblTipos;
-    private javax.swing.JTextField txtTipo;
+    private javax.swing.JTable tblProductos;
+    private javax.swing.JTextField txtCantidad;
+    private javax.swing.JTextField txtNombre;
     // End of variables declaration//GEN-END:variables
 }
