@@ -390,7 +390,7 @@ public class Restaurante {
                 return new ResultadoOperacion(false, "El nombre del tipo de plato no puede estar vacio");
             }
 
-            TipoPlato tipoNuevo = new TipoPlato(id, nombre);
+            TipoPlato tipoNuevo = new TipoPlato(id, nombre, true);
 
             //Validamos que no exista
             if (tiposPlato.contains(tipoNuevo)) {
@@ -423,7 +423,7 @@ public class Restaurante {
                 return new ResultadoOperacion(false, "El nombre del tipo de plato no puede estar vacio");
             }
 
-            TipoPlato tipoPrueba = new TipoPlato(id, nombre);
+            TipoPlato tipoPrueba = new TipoPlato(id, nombre, true);
 
             //Validamos que no exista
             if (tiposPlato.contains(tipoPrueba)) {
@@ -451,7 +451,7 @@ public class Restaurante {
      */
     public static ResultadoOperacion eliminarTipoPlato(int id) {
         try {
-            tiposPlato.remove(id);
+            tiposPlato.get(id).setDisponibilidad(false);
             return new ResultadoOperacion(true, "¡La promoción ha sido eliminada con éxito!");
         } catch (IndexOutOfBoundsException e) {
             return new ResultadoOperacion(false, """
@@ -495,6 +495,18 @@ public class Restaurante {
         }
 
         return null;
+    }
+    
+    public static List<TipoPlato> obtenerTiposPlatoDisponibles(){
+        List<TipoPlato> coincidencias = new ArrayList<>();
+
+        for (TipoPlato tipo : tiposPlato) {
+            if (tipo.isDisponibilidad()) {
+                coincidencias.add(tipo);
+            }
+        }
+        
+        return coincidencias;
     }
 
     //Método para plato

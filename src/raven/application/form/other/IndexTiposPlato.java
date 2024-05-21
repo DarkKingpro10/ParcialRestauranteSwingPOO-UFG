@@ -4,9 +4,16 @@
  */
 package raven.application.form.other;
 
+import application.controllers.TipoPlatoController;
+import application.tablesModel.TipoPlatoTableModel;
+import application.utils.CentrarColumnas;
+import application.utils.ResultadoOperacion;
+import application.utils.Validaciones;
 import com.formdev.flatlaf.FlatClientProperties;
+import javax.swing.JComponent;
 import javax.swing.UIManager;
 import net.miginfocom.swing.MigLayout;
+import raven.toast.Notifications;
 
 /**
  *
@@ -14,14 +21,52 @@ import net.miginfocom.swing.MigLayout;
  */
 public class IndexTiposPlato extends javax.swing.JPanel {
 
+    //Atributos de la clase
+    int idTipoPlato;
+    //Importando las clases
+    Validaciones validaciones = new Validaciones();
+    TipoPlatoController controller = new TipoPlatoController();
+
     /**
      * Creates new form IndexTiposPlato
      */
     public IndexTiposPlato() {
         initComponents();
+        inicializarCampos();
+        cargarTabla(controller.obtenerTiposPlato());
+    }
+
+    //Método para inicializar la vista
+    void inicializarCampos() {
+        //Aplicando estilos
         lb.putClientProperty(FlatClientProperties.STYLE, ""
                 + "font:$h1.font");
         lblErrorMsg.setVisible(false);
+        txtTipo.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ingrese el tipo de plato a buscar o añadir");
+
+        //Aplicando validaciones
+        JComponent[] componentesAValidar = {txtTipo};
+        validaciones.noPegar(componentesAValidar);
+        tblTipos.setDefaultRenderer(Object.class, new CentrarColumnas());
+    }
+
+    //Método para cargar la tabla
+    void cargarTabla(TipoPlatoTableModel model) {
+        tblTipos.setModel(model);
+    }
+
+    //Método para reiniciar el formulario
+    void reiniciarForm() {
+        txtTipo.setText("");
+        idTipoPlato = 0;
+    }
+
+    //Deshabilitar el formulario
+    void toggleEnableForm() {
+        txtTipo.setEnabled(!txtTipo.isEnabled());
+        btnAdd.setEnabled(!btnAdd.isEnabled());
+        btnDel.setEnabled(!btnDel.isEnabled());
+        btnMod.setEnabled(!btnMod.isEnabled());
     }
 
     /**
@@ -43,11 +88,12 @@ public class IndexTiposPlato extends javax.swing.JPanel {
         lblErrorMsg = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
-        txtBusqueda = new javax.swing.JTextField();
+        txtTipo = new javax.swing.JTextField();
         btnBuscar = new javax.swing.JButton();
+        lbUser = new javax.swing.JLabel();
         jPanel4 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tblTipos = new javax.swing.JTable();
 
         setPreferredSize(new java.awt.Dimension(806, 460));
 
@@ -75,6 +121,11 @@ public class IndexTiposPlato extends javax.swing.JPanel {
         btnAdd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/raven/icon/png/add-icon.png"))); // NOI18N
         btnAdd.setText(" Agregar ");
         btnAdd.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        btnAdd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout pnlFooterLayout = new javax.swing.GroupLayout(pnlFooter);
         pnlFooter.setLayout(pnlFooterLayout);
@@ -104,13 +155,18 @@ public class IndexTiposPlato extends javax.swing.JPanel {
 
         lblErrorMsg.setForeground(javax.swing.UIManager.getDefaults().getColor("Component.custom.borderColor"));
         lblErrorMsg.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblErrorMsg.setText("No hay tipos de pedido añadidos");
+        lblErrorMsg.setText("No hay tipos de platos añadidos");
 
         jPanel2.setLayout(new java.awt.GridLayout(1, 2));
 
-        txtBusqueda.addActionListener(new java.awt.event.ActionListener() {
+        txtTipo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtBusquedaActionPerformed(evt);
+                txtTipoActionPerformed(evt);
+            }
+        });
+        txtTipo.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtTipoKeyTyped(evt);
             }
         });
 
@@ -125,24 +181,29 @@ public class IndexTiposPlato extends javax.swing.JPanel {
             }
         });
 
+        lbUser.setText("Tipo de plato");
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap(35, Short.MAX_VALUE)
-                .addComponent(txtBusqueda, javax.swing.GroupLayout.PREFERRED_SIZE, 333, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lbUser, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtTipo, javax.swing.GroupLayout.PREFERRED_SIZE, 333, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGap(45, 45, 45)
+                        .addComponent(btnBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(35, Short.MAX_VALUE))
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btnBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap(63, Short.MAX_VALUE)
-                .addComponent(txtBusqueda, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(35, Short.MAX_VALUE)
+                .addComponent(lbUser)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtTipo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(68, 68, 68)
                 .addComponent(btnBuscar)
                 .addContainerGap(131, Short.MAX_VALUE))
@@ -150,18 +211,15 @@ public class IndexTiposPlato extends javax.swing.JPanel {
 
         jPanel2.add(jPanel3);
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tblTipos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null},
-                {null},
-                {null},
-                {null}
+
             },
             new String [] {
-                "Tipo de plato"
+
             }
         ));
-        jScrollPane1.setViewportView(jTable1);
+        jScrollPane1.setViewportView(tblTipos);
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -174,7 +232,9 @@ public class IndexTiposPlato extends javax.swing.JPanel {
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 309, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 303, Short.MAX_VALUE))
         );
 
         jPanel2.add(jPanel4);
@@ -208,14 +268,41 @@ public class IndexTiposPlato extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void txtBusquedaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtBusquedaActionPerformed
+    private void txtTipoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtTipoActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtBusquedaActionPerformed
+    }//GEN-LAST:event_txtTipoActionPerformed
 
     private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
-        // TODO add your handling code here:
-        lblErrorMsg.setVisible(!lblErrorMsg.isVisible());
+        //Ejecutamos el método de busqueda
+        if (txtTipo.getText().trim().isBlank()) {
+            cargarTabla(controller.obtenerTiposPlato());
+        } else {
+            cargarTabla(controller.buscarTipos(txtTipo.getText()));
+        }
     }//GEN-LAST:event_btnBuscarActionPerformed
+
+    private void txtTipoKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtTipoKeyTyped
+        //Validamos que solo acepte letras
+        validaciones.soloLetras(evt, 2, txtTipo.getText());
+    }//GEN-LAST:event_txtTipoKeyTyped
+
+    private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
+        //Deshabilitamos los botones
+        toggleEnableForm();
+        //Ejecutamos método
+        ResultadoOperacion res = controller.addTipo(txtTipo.getText().trim());
+
+        //Evaluamos la respuesta
+        if (res.isExito()) {
+            Notifications.getInstance().show(Notifications.Type.SUCCESS, Notifications.Location.TOP_RIGHT, res.getMensaje());
+            cargarTabla(controller.obtenerTiposPlato());
+            reiniciarForm();
+        } else {
+            Notifications.getInstance().show(Notifications.Type.ERROR, Notifications.Location.TOP_RIGHT, res.getMensaje());
+        }
+
+        toggleEnableForm();
+    }//GEN-LAST:event_btnAddActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -228,11 +315,12 @@ public class IndexTiposPlato extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
     private javax.swing.JLabel lb;
-    private javax.swing.JLabel lblErrorMsg;
+    private javax.swing.JLabel lbUser;
+    public static javax.swing.JLabel lblErrorMsg;
     private javax.swing.JPanel pnlCentral;
     private javax.swing.JPanel pnlFooter;
-    private javax.swing.JTextField txtBusqueda;
+    private javax.swing.JTable tblTipos;
+    private javax.swing.JTextField txtTipo;
     // End of variables declaration//GEN-END:variables
 }

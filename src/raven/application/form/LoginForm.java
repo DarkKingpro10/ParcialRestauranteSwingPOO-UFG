@@ -88,7 +88,7 @@ public class LoginForm extends javax.swing.JPanel {
             Application.usuario = user;
             Application.login();
         }else{
-            Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_CENTER, "Ingrese un nombre de usuario");
+            Notifications.getInstance().show(Notifications.Type.INFO, Notifications.Location.TOP_CENTER, "Ingrese un nombre de usuario");
         }
     }//GEN-LAST:event_cmdLoginActionPerformed
 
