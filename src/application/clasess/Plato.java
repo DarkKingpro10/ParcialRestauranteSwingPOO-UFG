@@ -37,6 +37,7 @@ public class Plato {
 
     //Constructor vacio
     public Plato() {
+        ingredientes = new ArrayList();
     }
 
     //GETTERS y SETTERS
@@ -103,7 +104,7 @@ public class Plato {
     public void setIngredientes(ArrayList<HashMap<Producto, Integer>> ingredientes) {
         this.ingredientes = ingredientes;
     }
-    
+
     //Metodos para validar si el objeto de la clase es igual a otro
     @Override
     public int hashCode() {
@@ -147,6 +148,7 @@ public class Plato {
                     return new ResultadoOperacion(true, "Cantidad de ingrediente incrementada exitosamente.");
                 }
             }
+
             //Como no lo esta lo añadimos
             HashMap<Producto, Integer> nuevoIngrediente = new HashMap<>();
             nuevoIngrediente.put(producto, cantidad);
@@ -182,18 +184,20 @@ public class Plato {
     /**
      * Método para conocer si el plato esta disponible para cocinar, dependiendo
      * de los ingredientes
-     * @return {boolean} Representa si esta disponible el plato o no para cocinar
+     *
+     * @return {boolean} Representa si esta disponible el plato o no para
+     * cocinar
      */
     public boolean disponibilidadIngredientes() {
         try {
             for (HashMap<Producto, Integer> ingrediente : ingredientes) {
-                for (Producto producto : ingrediente.keySet()) {    
-                    if (producto.getCantidadProducto()<= 0) {
+                for (Producto producto : ingrediente.keySet()) {
+                    if (producto.getCantidadProducto() <= 0) {
                         return false; // Al menos un producto tiene cantidad <= 0
                     }
                 }
             }
-            
+
             return true;
         } catch (Exception e) {
             return false;

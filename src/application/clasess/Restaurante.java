@@ -200,6 +200,9 @@ public class Restaurante {
                 coincidencias.add(producto);
             }
         }
+        
+        System.out.println(coincidencias.size());
+        
         return coincidencias;
     }
 
@@ -215,6 +218,17 @@ public class Restaurante {
         nombre = nombre.trim().toLowerCase();
         for (Producto producto : inventario) {
             if (producto.getNombreProducto().toLowerCase().equals(nombre)) {
+                return producto;
+            }
+        }
+
+        return null;
+    }
+    
+    ////Método para buscar un producto y retornarlo
+    public static Producto buscarProducto(int id) {
+        for (Producto producto : inventario) {
+            if (producto.getIdProducto() == id && !producto.fueBorrado()) {
                 return producto;
             }
         }
@@ -616,7 +630,7 @@ public class Restaurante {
      */
     public static ResultadoOperacion eliminarPlato(int id) {
         try {
-            tiposPlato.remove(id - 1);
+            platos.remove(id - 1);
             return new ResultadoOperacion(true, "¡El plato ha sido eliminado con éxito!");
         } catch (IndexOutOfBoundsException e) {
             return new ResultadoOperacion(false, """
@@ -649,11 +663,11 @@ public class Restaurante {
     }
 
     //Método para buscar un plato
-    public static Plato buscarPlato(String query) {
+    public static Plato buscarPlato(String query, int id) {
         //Recorremos la lista para buscar
         query = query.trim().toLowerCase();
         for (Plato plato : platos) {
-            if (plato.getNombrePlato().toLowerCase().equals(query)) {
+            if (plato.getNombrePlato().toLowerCase().equals(query) && plato.getIdPlato() == id) {
                 return plato;
             }
         }
@@ -664,6 +678,12 @@ public class Restaurante {
     public static List<Plato> obtenerPlatosDisponibles() {
         return platos.stream()
                 .filter(plato -> (plato.disponibilidadIngredientes() == true && plato.isDisponibilidad() == true))
+                .collect(Collectors.toList());
+    }
+
+    public static List<Plato> obtenerPlatosExistentes() {
+        return platos.stream()
+                .filter(plato -> plato.isDisponibilidad())
                 .collect(Collectors.toList());
     }
 

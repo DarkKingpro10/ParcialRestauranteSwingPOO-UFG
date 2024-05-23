@@ -11,6 +11,7 @@ import application.utils.ResultadoOperacion;
 import application.utils.Validaciones;
 import com.formdev.flatlaf.FlatClientProperties;
 import javax.swing.JComponent;
+import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
 import net.miginfocom.swing.MigLayout;
 import raven.toast.Notifications;
@@ -42,12 +43,13 @@ public class IndexTiposPlato extends javax.swing.JPanel {
         lb.putClientProperty(FlatClientProperties.STYLE, ""
                 + "font:$h1.font");
         lblErrorMsg.setVisible(false);
-        txtTipo.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ingrese el tipo de plato a buscar o añadir");
+        txtTipo.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Bebidas...");
 
         //Aplicando validaciones
         JComponent[] componentesAValidar = {txtTipo};
         validaciones.noPegar(componentesAValidar);
         tblTipos.setDefaultRenderer(Object.class, new CentrarColumnas());
+        tblTipos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
 
     //Método para cargar la tabla
@@ -186,7 +188,7 @@ public class IndexTiposPlato extends javax.swing.JPanel {
             }
         });
 
-        lbUser.setText("Tipo de plato");
+        lbUser.setText("Tipo de plato:");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -327,7 +329,7 @@ public class IndexTiposPlato extends javax.swing.JPanel {
         } else {
             Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe seleccionar un tipo de plato");
         }
-        
+
         toggleEnableForm();
     }//GEN-LAST:event_btnDelActionPerformed
 
@@ -358,7 +360,7 @@ public class IndexTiposPlato extends javax.swing.JPanel {
         } else {
             Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe seleccionar un tipo de plato");
         }
-        
+
         toggleEnableForm();
     }//GEN-LAST:event_btnModActionPerformed
 

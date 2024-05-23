@@ -199,7 +199,7 @@
                       <Group type="102" attributes="0">
                           <Component id="jPanel3" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="jPanel4" pref="181" max="32767" attributes="0"/>
+                          <Component id="jPanel4" max="32767" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
                   </Group>
@@ -288,12 +288,12 @@
                     </Component>
                     <Component class="javax.swing.JLabel" name="lbUser">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Nombre Producto"/>
+                        <Property name="text" type="java.lang.String" value="Nombre Producto:"/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JLabel" name="lbUser1">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Cantidad del producto"/>
+                        <Property name="text" type="java.lang.String" value="Cantidad del producto:"/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JTextField" name="txtCantidad">

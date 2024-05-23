@@ -69,4 +69,9 @@ public class TipoPlato {
         }
         return Objects.equals(this.nombreTipoPlato, other.nombreTipoPlato);
     }
+
+    @Override
+    public String toString() {
+        return nombreTipoPlato;
+    }
 }

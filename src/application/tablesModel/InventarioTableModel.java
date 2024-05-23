@@ -50,7 +50,7 @@ public class InventarioTableModel extends AbstractTableModel {
         return String.class;
     }
 
-    public Producto getTipoPlatoAt(int rowIndex) {
+    public Producto getProductoAt(int rowIndex) {
         return inventario.get(rowIndex);
     }
 

@@ -11,6 +11,7 @@ import application.utils.ResultadoOperacion;
 import application.utils.Validaciones;
 import com.formdev.flatlaf.FlatClientProperties;
 import javax.swing.JComponent;
+import javax.swing.ListSelectionModel;
 import raven.toast.Notifications;
 
 /**
@@ -23,6 +24,7 @@ public class IndexInventario extends javax.swing.JPanel {
     int idProducto;
     //Importando las clases
     Validaciones validaciones = new Validaciones();
+    //Importando controlador
     ProductoController controller = new ProductoController();
 
     /**
@@ -40,12 +42,13 @@ public class IndexInventario extends javax.swing.JPanel {
         lb.putClientProperty(FlatClientProperties.STYLE, ""
                 + "font:$h1.font");
         lblErrorMsg.setVisible(false);
-        txtNombre.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ingrese el nombre del producto");
-        txtCantidad.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ingrese la cantidad del producto a añadir");
+        txtNombre.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Papas Fritas ...");
+        txtCantidad.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "10");
         //Aplicando validaciones
         JComponent[] componentesAValidar = {txtNombre, txtCantidad};
         validaciones.noPegar(componentesAValidar);
         tblProductos.setDefaultRenderer(Object.class, new CentrarColumnas());
+        tblProductos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
 
     //Método para cargar la tabla
@@ -187,9 +190,9 @@ public class IndexInventario extends javax.swing.JPanel {
             }
         });
 
-        lbUser.setText("Nombre Producto");
+        lbUser.setText("Nombre Producto:");
 
-        lbUser1.setText("Cantidad del producto");
+        lbUser1.setText("Cantidad del producto:");
 
         txtCantidad.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
@@ -293,7 +296,7 @@ public class IndexInventario extends javax.swing.JPanel {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, 181, Short.MAX_VALUE)
+                .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
