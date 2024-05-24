@@ -26,11 +26,9 @@ public class ButtonEditor extends DefaultCellEditor {
         button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 fireEditingStopped();
-                System.out.println("Entro aqui");
                 String row = (String) table.getValueAt(table.getSelectedRow(), 0);
                 //int id = ((PlatosTableModel) table.getModel()).getIdAt(row);
                 // Aquí puedes llamar al método que necesites con el ID del plato
-                System.out.println("ID del plato seleccionado: " + Integer.valueOf(row));
             }
         });
     }

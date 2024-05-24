@@ -21,6 +21,7 @@ import raven.application.form.other.FormInbox;
 import raven.application.form.other.FormRead;
 import raven.application.form.other.IndexInventario;
 import raven.application.form.other.IndexPlatos;
+import raven.application.form.other.IndexPromociones;
 import raven.application.form.other.IndexTiposPlato;
 import raven.menu.Menu;
 import raven.menu.MenuAction;
@@ -79,6 +80,8 @@ public class MainForm extends JLayeredPane {
                 Application.showForm(new IndexPlatos());
             } else if (index == 3) {
                 Application.showForm(new IndexInventario());
+            } else if (index == 4) {
+                Application.showForm(new IndexPromociones());
             } else if (index == 5) {
                 Application.showForm(new IndexTiposPlato());
             }  else if (index == 7) {

@@ -66,9 +66,10 @@ public class ProductoController {
      * @param id representa el id del producto
      * @param nombre a modificar
      * @param cantidad a añadir al producto
+     * @param cantidadD a eliminar al producto
      * @return 
      */
-    public ResultadoOperacion modProducto(int id, String nombre, int cantidad){
-        return Restaurante.modificarProducto(id, nombre, cantidad);
+    public ResultadoOperacion modProducto(int id, String nombre, int cantidad, int cantidadD){
+        return Restaurante.modificarProducto(id, nombre, cantidad, cantidadD);
     }
 }

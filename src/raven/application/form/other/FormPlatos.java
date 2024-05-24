@@ -1,5 +1,6 @@
 package raven.application.form.other;
 
+import application.clasess.Plato;
 import application.clasess.Producto;
 import application.clasess.TipoPlato;
 import application.controllers.PlatosController;
@@ -38,11 +39,15 @@ public class FormPlatos extends javax.swing.JPanel {
 
     public FormPlatos() {
         initComponents();
-        lb.putClientProperty(FlatClientProperties.STYLE, ""
-                + "font:$h1.font");
+        prepararAdd();
         inicializarCampos();
-        cargarTipoPlatos();
-        cargarTablaIngredientesLst(controller.obtenerIngredientes());
+    }
+
+    public FormPlatos(int id) {
+        initComponents();
+        this.idPlato = id;
+        prepararMod();
+        inicializarCampos();
     }
 
     //Método para inicializar los campos de las tablas
@@ -67,7 +72,39 @@ public class FormPlatos extends javax.swing.JPanel {
         tblIngredientesAgr.setDefaultRenderer(Object.class, new CentrarColumnas());
         tblIngredientesAgr.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
+        //Cargamos las tablas
+        cargarTablaIngredientesLst(controller.obtenerIngredientes());
+        cargarTablaIngredientesAgr(controller.obtenerIngredientesAgr());
+    }
+
+    //Método para preparar el form para cuando se deba añadir
+    void prepararAdd() {
         controller = new PlatosController();
+        lb.setText("Agregar Plato");
+        btnMod.setVisible(false);
+        cargarTipoPlatos();
+    }
+
+    //Método para preparar el formulario cuando se debe modificar
+    void prepararMod() {
+        controller = new PlatosController(idPlato);
+        lb.setText("Modificar Plato");
+        btnAdd.setVisible(false);
+        Plato plato = controller.obtenerPlato();
+
+        txtNombre.setText(plato.getNombrePlato());
+        txtTiempoEMn.setText(String.valueOf(plato.getTiempoEstimadoPreparacionMn()));
+        txtPrecio.setText(String.valueOf(plato.getPrecio()));
+        txaDescripcion.setText(plato.getDescripcion());
+
+        //Seteamos el combobox
+        cargarTipoPlatos();
+        if (!plato.getTipoPlato().isDisponibilidad()) {
+            Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "El tipo plato fue eliminado, seleccione uno nuevo");
+        } else {
+            cmbTipoPlato.setSelectedItem(plato.getTipoPlato());
+        }
+
     }
 
     //Método para inicializar el combobox
@@ -121,6 +158,12 @@ public class FormPlatos extends javax.swing.JPanel {
         txtTiempoEMn.setEnabled(!txtTiempoEMn.isEnabled());
         txaDescripcion.setEnabled(!txaDescripcion.isEnabled());
         btnAdd.setEnabled(!btnAdd.isEnabled());
+        btnMod.setEnabled(!btnMod.isEnabled());
+    }
+
+    //Método para regresar al anterior form
+    void regresarAIndex() {
+        Application.showForm(new IndexPlatos());
     }
 
     @SuppressWarnings("unchecked")
@@ -164,6 +207,7 @@ public class FormPlatos extends javax.swing.JPanel {
         tblIngredientesAgr = new javax.swing.JTable();
         pnlFooter = new javax.swing.JPanel();
         btnAdd = new javax.swing.JButton();
+        btnMod = new javax.swing.JButton();
 
         jPanel1.setLayout(new java.awt.BorderLayout());
 
@@ -206,6 +250,7 @@ public class FormPlatos extends javax.swing.JPanel {
         jScrollPane1.setViewportView(txaDescripcion);
 
         lbUser3.setText("Descripción del Plato:");
+        lbUser3.setToolTipText("");
 
         cmbTipoPlato.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccione un Tipo de Plato" }));
 
@@ -349,11 +394,8 @@ public class FormPlatos extends javax.swing.JPanel {
                         .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtIngredientesLst)
                             .addComponent(txtCantidadLst, javax.swing.GroupLayout.DEFAULT_SIZE, 289, Short.MAX_VALUE)
-                            .addGroup(jPanel8Layout.createSequentialGroup()
-                                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel5)
-                                    .addComponent(jLabel6))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
+                            .addComponent(jLabel5)
+                            .addComponent(jLabel6))
                         .addGap(18, 18, 18)
                         .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(btnBuscarILst)
@@ -397,6 +439,11 @@ public class FormPlatos extends javax.swing.JPanel {
         btnBuscarIAgr.setForeground(new java.awt.Color(0, 0, 0));
         btnBuscarIAgr.setIcon(new javax.swing.ImageIcon(getClass().getResource("/raven/icon/png/search-icon.png"))); // NOI18N
         btnBuscarIAgr.setText("Buscar");
+        btnBuscarIAgr.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBuscarIAgrActionPerformed(evt);
+            }
+        });
 
         txtIngredientesAgr.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
@@ -417,6 +464,11 @@ public class FormPlatos extends javax.swing.JPanel {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        tblIngredientesAgr.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblIngredientesAgrMouseClicked(evt);
+            }
+        });
         jScrollPane2.setViewportView(tblIngredientesAgr);
 
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
@@ -472,19 +524,35 @@ public class FormPlatos extends javax.swing.JPanel {
             }
         });
 
+        btnMod.setBackground(javax.swing.UIManager.getDefaults().getColor("Actions.Yellow"));
+        btnMod.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnMod.setForeground(new java.awt.Color(0, 0, 0));
+        btnMod.setIcon(new javax.swing.ImageIcon(getClass().getResource("/raven/icon/png/mod-icon.png"))); // NOI18N
+        btnMod.setText(" Modificar ");
+        btnMod.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        btnMod.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnModActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout pnlFooterLayout = new javax.swing.GroupLayout(pnlFooter);
         pnlFooter.setLayout(pnlFooterLayout);
         pnlFooterLayout.setHorizontalGroup(
             pnlFooterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlFooterLayout.createSequentialGroup()
+            .addGroup(pnlFooterLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(pnlFooterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnMod, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         pnlFooterLayout.setVerticalGroup(
             pnlFooterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlFooterLayout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
+                .addContainerGap()
+                .addComponent(btnMod, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
@@ -543,17 +611,41 @@ public class FormPlatos extends javax.swing.JPanel {
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         //Deshabilitamos los botones
+        toggleEnableForm();
         TipoPlato tipoSeleccionado = (TipoPlato) cmbTipoPlato.getSelectedItem();
         if (tipoSeleccionado.getIdTipoPlato() == -1 || tipoSeleccionado == null) {
             Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe seleccionar un tipo de plato");
-        } else {
-            controller.add(tipoSeleccionado);
+            toggleEnableForm();
+            return;
+        } else if (txtTiempoEMn.getText().trim().isBlank()) {
+            Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe ingresar el tiempo de realización estimado");
+            toggleEnableForm();
+            return;
+        } else if (txtPrecio.getText().trim().isBlank()) {
+            Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "El precio por el restaurante, debe ser mayor o igual 0");
+            toggleEnableForm();
+            return;
         }
+
+        double precio = Double.valueOf(txtPrecio.getText().trim());
+        int tiempo = Integer.valueOf(txtTiempoEMn.getText().trim());
+
+        //Como cumplio las validaciones entonces ejecutamos la operación
+        ResultadoOperacion res = controller.add(txtNombre.getText().trim(), txaDescripcion.getText().trim(), precio, tiempo, tipoSeleccionado);
+
+        if (res.isExito()) {
+            Notifications.getInstance().show(Notifications.Type.SUCCESS, Notifications.Location.TOP_RIGHT, res.getMensaje());
+            reiniciarFormGeneral();
+            regresarAIndex();
+        } else {
+            Notifications.getInstance().show(Notifications.Type.ERROR, Notifications.Location.TOP_RIGHT, res.getMensaje());
+        }
+        toggleEnableForm();
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void txtPrecioKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtPrecioKeyTyped
         //Validamos que solo acepte numero y el punto
-        validaciones.soloNumeros(evt, 3, txtPrecio.getText());
+        validaciones.soloNumeros(evt, 5, txtPrecio.getText());
     }//GEN-LAST:event_txtPrecioKeyTyped
 
     private void txtIngredientesAgrKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtIngredientesAgrKeyTyped
@@ -565,7 +657,7 @@ public class FormPlatos extends javax.swing.JPanel {
     }//GEN-LAST:event_txtIngredientesLstKeyTyped
 
     private void jLabel1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseClicked
-        Application.showForm(new IndexPlatos());
+        regresarAIndex();
     }//GEN-LAST:event_jLabel1MouseClicked
 
     private void btnBuscarILstActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarILstActionPerformed
@@ -584,7 +676,6 @@ public class FormPlatos extends javax.swing.JPanel {
     private void btnAddIngrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddIngrActionPerformed
         //Evento para agregar un ingrediente al plato
         int row = tblIngredientesLst.getSelectedRow();
-
         if (row < 0 && idProducto <= 0) {
             Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe seleccionar un Ingredeiente para añadir");
             return;
@@ -603,7 +694,7 @@ public class FormPlatos extends javax.swing.JPanel {
         } else {
             Notifications.getInstance().show(Notifications.Type.ERROR, Notifications.Location.TOP_RIGHT, res.getMensaje());
         }
-        
+
         reiniciarFormPA();
     }//GEN-LAST:event_btnAddIngrActionPerformed
 
@@ -618,11 +709,73 @@ public class FormPlatos extends javax.swing.JPanel {
         idProducto = model.getIdAt(row);
     }//GEN-LAST:event_tblIngredientesLstMouseClicked
 
+    private void tblIngredientesAgrMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblIngredientesAgrMouseClicked
+        //Controlamos si da click para eliminar el producto
+        int row = tblIngredientesAgr.getSelectedRow();
+        int column = tblIngredientesAgr.getSelectedColumn();
+
+        if (column == 3) {
+            int idPlatoAEliminar = Integer.valueOf(tblIngredientesAgr.getValueAt(row, 0).toString());
+            ResultadoOperacion res = controller.delIngrediente(idPlatoAEliminar);
+
+            if (res.isExito()) {
+                cargarTablaIngredientesAgr(controller.obtenerIngredientesAgr());
+                Notifications.getInstance().show(Notifications.Type.SUCCESS, Notifications.Location.TOP_RIGHT, res.getMensaje());
+            } else {
+                Notifications.getInstance().show(Notifications.Type.ERROR, Notifications.Location.TOP_RIGHT, res.getMensaje());
+            }
+        }
+    }//GEN-LAST:event_tblIngredientesAgrMouseClicked
+
+    private void btnBuscarIAgrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarIAgrActionPerformed
+        //Ejecutamos el método de busqueda para los ingredientes añadidos
+        if (txtIngredientesAgr.getText().trim().isBlank()) {
+            cargarTablaIngredientesAgr(controller.obtenerIngredientesAgr());
+        } else {
+            cargarTablaIngredientesAgr(controller.buscarIngredientes(txtIngredientesAgr.getText()));
+        }
+    }//GEN-LAST:event_btnBuscarIAgrActionPerformed
+
+    private void btnModActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModActionPerformed
+        //Deshabilitamos los botones
+        toggleEnableForm();
+        TipoPlato tipoSeleccionado = (TipoPlato) cmbTipoPlato.getSelectedItem();
+        if (tipoSeleccionado.getIdTipoPlato() == -1 || tipoSeleccionado == null) {
+            Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe seleccionar un tipo de plato");
+            toggleEnableForm();
+            return;
+        } else if (txtTiempoEMn.getText().trim().isBlank()) {
+            Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe ingresar el tiempo de realización estimado");
+            toggleEnableForm();
+            return;
+        } else if (txtPrecio.getText().trim().isBlank()) {
+            Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "El precio por el restaurante, debe ser mayor o igual 0");
+            toggleEnableForm();
+            return;
+        }
+
+        double precio = Double.valueOf(txtPrecio.getText().trim());
+        int tiempo = Integer.valueOf(txtTiempoEMn.getText().trim());
+
+        //Como cumplio las validaciones entonces ejecutamos la operación
+        ResultadoOperacion res = controller.mod(txtNombre.getText().trim(), txaDescripcion.getText().trim(), precio, tiempo, tipoSeleccionado);
+
+        if (res.isExito()) {
+            Notifications.getInstance().show(Notifications.Type.SUCCESS, Notifications.Location.TOP_RIGHT, res.getMensaje());
+            reiniciarFormGeneral();
+            regresarAIndex();
+        } else {
+            Notifications.getInstance().show(Notifications.Type.ERROR, Notifications.Location.TOP_RIGHT, res.getMensaje());
+        }
+        toggleEnableForm();
+    }//GEN-LAST:event_btnModActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnAddIngr;
     private javax.swing.JButton btnBuscarIAgr;
     private javax.swing.JButton btnBuscarILst;
+    private javax.swing.JButton btnMod;
     private javax.swing.JComboBox<String> cmbTipoPlato;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

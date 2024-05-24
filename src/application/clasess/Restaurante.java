@@ -112,7 +112,7 @@ public class Restaurante {
      * @param cantidad representa la cantidad del producto a añadir
      * @return objeto de tipo {ResultadoOperacion}
      */
-    public static ResultadoOperacion modificarProducto(int id, String nombre, int cantidad) {
+    public static ResultadoOperacion modificarProducto(int id, String nombre, int cantidad, int cantidadD) {
         try {
             Producto productoAModificar = inventario.get(id - 1);
 
@@ -127,7 +127,7 @@ public class Restaurante {
 
             if (nombre.isEmpty()) {
                 return new ResultadoOperacion(false, "El nombre del producto no puede estar vacio");
-            } else if (cantidad <= 0) {
+            } else if (cantidad < 0) {
                 return new ResultadoOperacion(false, "La cantidad nueva a añadir no puede ser menor o igual a 0");
             }
 
@@ -144,7 +144,7 @@ public class Restaurante {
 
             productoAModificar.setNombreProducto(nombre);
             int cantidadActual = productoAModificar.getCantidadProducto();
-            productoAModificar.setCantidadProducto(cantidad + cantidadActual);
+            productoAModificar.setCantidadProducto((cantidad + cantidadActual) - cantidadD);
 
             return new ResultadoOperacion(true, "¡El producto ha sido modificado con exito!");
         } catch (IndexOutOfBoundsException e) {
@@ -200,9 +200,9 @@ public class Restaurante {
                 coincidencias.add(producto);
             }
         }
-        
+
         System.out.println(coincidencias.size());
-        
+
         return coincidencias;
     }
 
@@ -224,7 +224,7 @@ public class Restaurante {
 
         return null;
     }
-    
+
     ////Método para buscar un producto y retornarlo
     public static Producto buscarProducto(int id) {
         for (Producto producto : inventario) {
@@ -545,7 +545,7 @@ public class Restaurante {
      * Método para añadir un plato
      *
      * @param plato representa el plato a añadir
-     * @return
+     * @return ResultadoOperacion
      */
     public static ResultadoOperacion agregarPlato(Plato plato) {
         //Validamos que el nombre del producto no exista
@@ -560,6 +560,8 @@ public class Restaurante {
                 return new ResultadoOperacion(false, "El tiempo de relización estimado en minutos debe ser mayor a 0");
             } else if (plato.getIngredientes().size() <= 0) {
                 return new ResultadoOperacion(false, "Un plato necesita los productos que contendrá");
+            } else if (plato.getPrecio() < 0) {
+                return new ResultadoOperacion(false, "Una plato no puede tener un precio menor que 0");
             }
 
             //Validamos que no exista
@@ -594,15 +596,24 @@ public class Restaurante {
                 return new ResultadoOperacion(false, "El tiempo de relización estimado en minutos debe ser mayor a 0");
             } else if (plato.getIngredientes().size() <= 0) {
                 return new ResultadoOperacion(false, "Un plato necesita los productos que contendrá");
+            } else if (plato.getPrecio() < 0) {
+                return new ResultadoOperacion(false, "Una plato no puede tener un precio menor que 0");
             }
 
             //Validamos que no exista
-            if (platos.contains(plato)) {
-                return new ResultadoOperacion(false, "¡El tipo de plato ya se encuentra registrado!");
+            //Validamos que el nombre del producto no este ya dentro
+            for (Plato platoPrueba : platos) {
+                if (platoPrueba.isDisponibilidad()) {
+                    continue;
+                }
+
+                if (platoPrueba.getNombrePlato().equals(plato.getNombrePlato()) && plato.getIdPlato()!= id) {
+                    return new ResultadoOperacion(false, "¡El nombre del plato ya se encuentra registrado!");
+                }
             }
 
             //Ya que el producto no se ha registrado, entonces lo añadiremos al arreglo
-            Plato platoAModificar = platos.get(id);
+            Plato platoAModificar = platos.get(id-1);
 
             platoAModificar.setDescripcion(plato.getDescripcion());
             platoAModificar.setIngredientes(plato.getIngredientes());
@@ -630,7 +641,7 @@ public class Restaurante {
      */
     public static ResultadoOperacion eliminarPlato(int id) {
         try {
-            platos.remove(id - 1);
+            platos.get(id-1).setDisponibilidad(false);
             return new ResultadoOperacion(true, "¡El plato ha sido eliminado con éxito!");
         } catch (IndexOutOfBoundsException e) {
             return new ResultadoOperacion(false, """
@@ -654,7 +665,7 @@ public class Restaurante {
         List<Plato> coincidencias = new ArrayList<>();
 
         for (Plato plato : platos) {
-            if (plato.getNombrePlato().toLowerCase().contains(query)) {
+            if (plato.getNombrePlato().toLowerCase().contains(query) && plato.isDisponibilidad()) {
                 coincidencias.add(plato);
             }
         }
@@ -663,11 +674,9 @@ public class Restaurante {
     }
 
     //Método para buscar un plato
-    public static Plato buscarPlato(String query, int id) {
-        //Recorremos la lista para buscar
-        query = query.trim().toLowerCase();
+    public static Plato buscarPlato(int id) {
         for (Plato plato : platos) {
-            if (plato.getNombrePlato().toLowerCase().equals(query) && plato.getIdPlato() == id) {
+            if (plato.getIdPlato() == id) {
                 return plato;
             }
         }
@@ -675,6 +684,7 @@ public class Restaurante {
         return null;
     }
 
+    //Método para buscar un Plato
     public static List<Plato> obtenerPlatosDisponibles() {
         return platos.stream()
                 .filter(plato -> (plato.disponibilidadIngredientes() == true && plato.isDisponibilidad() == true))

@@ -84,6 +84,7 @@ public class IndexPlatos extends javax.swing.JPanel {
 
         // Crear y mostrar la tabla de detalle en un diálogo
         tablaDetalle = new JTable(modeloDetalle);
+        tablaDetalle.setDefaultRenderer(Object.class, new CentrarColumnas());
         JScrollPane scrollPane = new JScrollPane(tablaDetalle);
         JOptionPane.showMessageDialog(null, scrollPane, "Detalle del Plato: " + (platoSeleccionado.getNombrePlato()), JOptionPane.PLAIN_MESSAGE);
     }
@@ -297,7 +298,12 @@ public class IndexPlatos extends javax.swing.JPanel {
     }//GEN-LAST:event_btnDelActionPerformed
 
     private void btnModActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModActionPerformed
-
+        int row = tblPlatos.getSelectedRow();
+        if (row != -1 && idPlato > 0) {
+            Application.showForm(new FormPlatos(idPlato));
+        } else {
+            Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe seleccionar un plato");
+        }
     }//GEN-LAST:event_btnModActionPerformed
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed

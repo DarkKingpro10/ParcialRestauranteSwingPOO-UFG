@@ -3,6 +3,7 @@ package application.clasess;
 import application.utils.ResultadoOperacion;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -38,6 +39,12 @@ public class Plato {
     //Constructor vacio
     public Plato() {
         ingredientes = new ArrayList();
+    }
+    
+    //Contructor especial para casos vacios
+    public Plato(int id, String nombrePlato){
+        this.idPlato = id;
+        this.nombrePlato = nombrePlato;
     }
 
     //GETTERS y SETTERS
@@ -202,5 +209,36 @@ public class Plato {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /**
+     * Método para buscar los ingredientes del plato
+     * @param query el parametro a buscar
+     * @return 
+     */
+    public ArrayList<HashMap<Producto, Integer>> buscarIngredientes(String query) {
+        //Recorremos la lista para buscar
+        query = query.trim().toLowerCase();
+        
+        ArrayList<HashMap<Producto, Integer>> coincidencias = new ArrayList<>();
+        //Recorremos la lista
+        for (HashMap<Producto, Integer> ingrediente : this.ingredientes) {
+            for (Map.Entry<Producto, Integer> entry : ingrediente.entrySet()) {
+                Producto producto = entry.getKey();
+                Integer cantidad = entry.getValue();
+                
+                //Validamos que sea el parametro a buscar
+                if(producto.getNombreProducto().contains(query) || String.valueOf(producto.getCantidadProducto()).contains(query)){
+                    coincidencias.add(ingrediente);
+                }
+            }
+        }
+        
+        return coincidencias;
+    };
+    
+    @Override
+    public String toString() {
+        return this.nombrePlato;
     }
 }

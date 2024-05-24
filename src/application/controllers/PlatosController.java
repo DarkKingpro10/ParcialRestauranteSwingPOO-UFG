@@ -7,12 +7,12 @@ import application.clasess.TipoPlato;
 import application.tablesModel.InventarioTableModel;
 import application.tablesModel.PlatosTableModel;
 import application.utils.ResultadoOperacion;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.table.DefaultTableModel;
+import raven.application.Application;
 import raven.application.form.other.FormPlatos;
 import raven.application.form.other.IndexPlatos;
 import raven.toast.Notifications;
@@ -28,6 +28,15 @@ public class PlatosController {
         plato = new Plato();
     };
     
+    //Método para inicializar el plato a modificarse
+    public PlatosController(int id){
+        plato = Restaurante.buscarPlato(id);
+        
+        if(plato == null){
+            Notifications.getInstance().show(Notifications.Type.INFO, Notifications.Location.TOP_RIGHT, "El plato no se ha encontrado");
+            Application.showForm(new IndexPlatos());
+        }
+    }
     //Método para obtener los platos
     public PlatosTableModel obtenerPlatosTModel() {
         /*TipoPlato tipo = new TipoPlato(1, "Bebida", true);
@@ -52,7 +61,6 @@ public class PlatosController {
         Restaurante.getPlatos().add(plato);*/
 
         List<Plato> platos = Restaurante.obtenerPlatosExistentes();
-        platos = Restaurante.getPlatos();
 
         if (platos.size() <= 0) {
             IndexPlatos.lblErrorMsg.setVisible(true);
@@ -152,17 +160,74 @@ public class PlatosController {
         
         return res;
     }
-            
-    public void add(TipoPlato tipo) {
-        Plato plato = new Plato();
-        plato.setIdPlato(1);
-        plato.setNombrePlato("Prueba cmbios");
-        plato.setTipoPlato(tipo);
-        plato.setDescripcion("Descripción prueba");
-        plato.setPrecio(25.5);
-        plato.setTiempoEstimadoPreparacionMn(5);
+    
+    //Método para eliminar un ingrediente del plato
+    public ResultadoOperacion delIngrediente(int IdProducto){
+        //Obtenemos el producto
+        Producto ingrediente = Restaurante.buscarProducto(IdProducto);
         
-        Restaurante.getPlatos().add(plato);
-        System.out.println(Restaurante.getPlatos().size());
+        ResultadoOperacion res = plato.borrarIngrediente(ingrediente);
+        
+        return res;
+    }
+    
+    //Método para obtener los ingredientes según la busqueda
+    public DefaultTableModel buscarIngredientes(String query){
+        DefaultTableModel modelo = new DefaultTableModel();
+        modelo.addColumn("ID Producto");
+        modelo.addColumn("Ingrediente");
+        modelo.addColumn("Cantidad");
+        modelo.addColumn("Eliminar Ingrediente");
+        
+        for (HashMap<Producto, Integer> ingrediente : plato.buscarIngredientes(query)) {
+            for (Map.Entry<Producto, Integer> entry : ingrediente.entrySet()) {
+                Producto producto = entry.getKey();
+                Integer cantidad = entry.getValue();
+                modelo.addRow(new Object[]{producto.getIdProducto(),producto.getNombreProducto(), cantidad,""});
+            }
+        }
+        
+        return modelo;
+    }
+            
+    /**
+     * Método para añadir un plato al restaurante
+     * @param nombre representa el nombre del plato
+     * @param descripcion representa la descripción del plato
+     * @param precio representa el precio
+     * @param tiempo representa el tiempo estimado que toma preparar el plato
+     * @param tipo representa el tipo de plato
+     */
+    public ResultadoOperacion add(String nombre, String descripcion, double precio, int tiempo, TipoPlato tipo) {
+        plato.setNombrePlato(nombre);
+        plato.setTipoPlato(tipo);
+        plato.setDescripcion(descripcion);
+        plato.setPrecio(precio);
+        plato.setTiempoEstimadoPreparacionMn(tiempo);
+        
+        return Restaurante.agregarPlato(plato);
+    }
+    
+    //Método para obtener el plato que esta siendo modificado
+    public Plato obtenerPlato(){
+        return plato;
+    }
+    
+    /**
+     * Método para añadir un plato al restaurante
+     * @param nombre representa el nombre del plato
+     * @param descripcion representa la descripción del plato
+     * @param precio representa el precio
+     * @param tiempo representa el tiempo estimado que toma preparar el plato
+     * @param tipo representa el tipo de plato
+     */
+    public ResultadoOperacion mod(String nombre, String descripcion, double precio, int tiempo, TipoPlato tipo) {
+        plato.setNombrePlato(nombre);
+        plato.setTipoPlato(tipo);
+        plato.setDescripcion(descripcion);
+        plato.setPrecio(precio);
+        plato.setTiempoEstimadoPreparacionMn(tiempo);
+        
+        return Restaurante.modificarPlato(plato.getIdPlato(),plato);
     }
 }

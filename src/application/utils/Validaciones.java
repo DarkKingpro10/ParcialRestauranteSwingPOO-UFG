@@ -63,7 +63,7 @@ public class Validaciones {
                     }
                 }
                 break;
-            case 3://Solo numeros y punto
+            case 3://Solo numeros y guion
                 //Validamos que la primera entrada no sea el espacio
                 if (Character.isSpaceChar(c) && txt.equals("")) {
                     evt.consume();
