@@ -9,8 +9,34 @@ package application.enums;
  * @author Jesus Esquivel
  */
 public enum EstadoPedido {
-    PREPARADO,
-    PREPARANDOSE,
-    PAGADO,
-    CREANDOSE
+    PREPARADO {
+        @Override
+        public String toString() {
+            return "Preparado";
+        }
+    },
+    PREPARANDOSE {
+        @Override
+        public String toString() {
+            return "Preparandose";
+        }
+    },
+    PAGADO {
+        @Override
+        public String toString() {
+            return "Pagado";
+        }
+    },
+    CREANDOSE {
+        @Override
+        public String toString() {
+            return "Creandose";
+        }
+    },
+    CANCELADO{
+        @Override
+        public String toString(){
+            return "Cancelado";
+        }
+    }
 }

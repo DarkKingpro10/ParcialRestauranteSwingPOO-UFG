@@ -3,6 +3,7 @@ package application.clasess;
 import application.enums.EstadoPedido;
 import application.utils.ResultadoOperacion;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -607,13 +608,13 @@ public class Restaurante {
                     continue;
                 }
 
-                if (platoPrueba.getNombrePlato().equals(plato.getNombrePlato()) && plato.getIdPlato()!= id) {
+                if (platoPrueba.getNombrePlato().equals(plato.getNombrePlato()) && plato.getIdPlato() != id) {
                     return new ResultadoOperacion(false, "¡El nombre del plato ya se encuentra registrado!");
                 }
             }
 
             //Ya que el producto no se ha registrado, entonces lo añadiremos al arreglo
-            Plato platoAModificar = platos.get(id-1);
+            Plato platoAModificar = platos.get(id - 1);
 
             platoAModificar.setDescripcion(plato.getDescripcion());
             platoAModificar.setIngredientes(plato.getIngredientes());
@@ -641,7 +642,7 @@ public class Restaurante {
      */
     public static ResultadoOperacion eliminarPlato(int id) {
         try {
-            platos.get(id-1).setDisponibilidad(false);
+            platos.get(id - 1).setDisponibilidad(false);
             return new ResultadoOperacion(true, "¡El plato ha sido eliminado con éxito!");
         } catch (IndexOutOfBoundsException e) {
             return new ResultadoOperacion(false, """
@@ -722,7 +723,7 @@ public class Restaurante {
 
             //Ya que el producto no se ha registrado, entonces lo añadiremos al arreglo
             pedido.setIdPedido(id);
-            pedido.setEstadoPedido(EstadoPedido.CREANDOSE);
+            pedido.setEstadoPedido(EstadoPedido.PREPARANDOSE);
             pedido.setFechaPedido(LocalDate.now());
             pedidos.add(pedido);
             return new ResultadoOperacion(true, "¡Se agrego el pedido con exito!");
@@ -751,7 +752,7 @@ public class Restaurante {
             }
 
             //Ya que el producto no se ha registrado, entonces lo añadiremos al arreglo
-            Pedido pedidoAModificar = pedidos.get(id);
+            Pedido pedidoAModificar = pedidos.get(id - 1);
 
             pedidoAModificar.setEstadoPedido(pedido.getEstadoPedido());
             pedidoAModificar.setPlatos(pedido.getPlatos());
@@ -796,17 +797,30 @@ public class Restaurante {
      * @return objeto de tipo Plato
      */
     public static List<Pedido> buscarPedidos(String query) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
         //Recorremos la lista para buscar
         query = query.trim().toLowerCase();
         List<Pedido> coincidencias = new ArrayList<>();
 
         for (Pedido pedido : pedidos) {
+            try {
+                LocalDate parsedDate = LocalDate.parse(query, formatter);
+                if (pedido.getFechaPedido().equals(parsedDate)) {
+                    coincidencias.add(pedido);
+                    continue;
+                }
+            } catch (Exception e) {}
+
             if (pedido.getCliente().toLowerCase().contains(query)) {
                 coincidencias.add(pedido);
+                continue;
             } else if (String.valueOf(pedido.getIdPedido()).contains(query)) {
                 coincidencias.add(pedido);
+                continue;
             } else if (String.valueOf(pedido.getTiempoEntregaEstimado()).contains(query)) {
                 coincidencias.add(pedido);
+                continue;
             } else {
                 boolean found = false;
                 for (HashMap<Plato, Integer> platoMap : pedido.getPlatos()) {
@@ -831,7 +845,7 @@ public class Restaurante {
     //Método para buscar un pedido
     public static Pedido buscarPedio(int id) {
         try {
-            return pedidos.get(id);
+            return pedidos.get(id-1);
         } catch (Exception e) {
             return null;
         }

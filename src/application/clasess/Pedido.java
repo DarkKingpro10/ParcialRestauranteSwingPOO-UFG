@@ -3,6 +3,7 @@ package application.clasess;
 import application.enums.EstadoPedido;
 import application.utils.ResultadoOperacion;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
@@ -199,5 +200,11 @@ public class Pedido {
         this.setEstadoPedido(EstadoPedido.PAGADO);
         
         return new ResultadoOperacion(true, "Se facturo el pedido");
+    }
+    
+    //Método para obtener la fecha en formato correto
+    public String getFechaFormateada(){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        return this.fechaPedido.format(formatter);
     }
 }

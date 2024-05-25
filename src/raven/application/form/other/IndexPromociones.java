@@ -192,7 +192,7 @@ public class IndexPromociones extends javax.swing.JPanel {
 
         lblErrorMsg.setForeground(javax.swing.UIManager.getDefaults().getColor("Component.custom.borderColor"));
         lblErrorMsg.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblErrorMsg.setText("No hay tipos de platos añadidos");
+        lblErrorMsg.setText("No hay promociones añadidas");
 
         jPanel2.setLayout(new java.awt.GridLayout(2, 1));
 

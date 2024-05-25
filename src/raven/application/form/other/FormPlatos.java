@@ -130,7 +130,7 @@ public class FormPlatos extends javax.swing.JPanel {
         tblIngredientesAgr.getColumnModel().getColumn(3).setMaxWidth(100);
         tblIngredientesAgr.getColumnModel().getColumn(3).setMinWidth(100);
 
-        tblIngredientesAgr.getColumnModel().getColumn(3).setCellRenderer(new ButtonRenderer(Color.BLACK, iconDetalle, "Eliminar ingrediente"));
+        tblIngredientesAgr.getColumnModel().getColumn(3).setCellRenderer(new ButtonRenderer(Color.RED, iconDetalle, "Eliminar ingrediente"));
         tblIngredientesAgr.getColumnModel().getColumn(3).setCellEditor(new ButtonEditor(new JCheckBox(), tblIngredientesLst));
     }
 

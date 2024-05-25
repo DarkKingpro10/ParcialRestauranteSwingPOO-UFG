@@ -178,7 +178,7 @@
                   <Color blue="40" green="40" id="Component.custom.borderColor" palette="3" red="bf" type="palette"/>
                 </Property>
                 <Property name="horizontalAlignment" type="int" value="0"/>
-                <Property name="text" type="java.lang.String" value="No hay tipos de platos a&#xf1;adidos"/>
+                <Property name="text" type="java.lang.String" value="No hay promociones a&#xf1;adidas"/>
               </Properties>
               <AuxValues>
                 <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="9"/>

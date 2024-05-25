@@ -20,6 +20,7 @@ import raven.application.form.other.FormDashboard;
 import raven.application.form.other.FormInbox;
 import raven.application.form.other.FormRead;
 import raven.application.form.other.IndexInventario;
+import raven.application.form.other.IndexPedidos;
 import raven.application.form.other.IndexPlatos;
 import raven.application.form.other.IndexPromociones;
 import raven.application.form.other.IndexTiposPlato;
@@ -76,6 +77,8 @@ public class MainForm extends JLayeredPane {
             // Application.mainForm.showForm(new DefaultForm("Form : " + index + " " + subIndex));
             if (index == 0) {
                 Application.showForm(new FormDashboard());
+            } else if (index == 1) {
+                Application.showForm(new IndexPedidos());
             } else if (index == 2) {
                 Application.showForm(new IndexPlatos());
             } else if (index == 3) {
