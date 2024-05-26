@@ -199,7 +199,7 @@ public class Plato {
         try {
             for (HashMap<Producto, Integer> ingrediente : ingredientes) {
                 for (Producto producto : ingrediente.keySet()) {
-                    if (producto.getCantidadProducto() <= 0) {
+                    if (producto.getCantidadProducto() <= 0 || (producto.getCantidadProducto() < ingrediente.get(producto))) {
                         return false; // Al menos un producto tiene cantidad <= 0
                     }
                 }

@@ -159,18 +159,17 @@ public class Pedido {
                     plato.put(pedido, cantidadActual + cantidad);
 
                     //Actualizamos el total del pedido
-                    HashMap<String, Double> promo = Restaurante.consultarDescuento(pedido, cantidad);
+                    HashMap<String, Double> promo = Restaurante.consultarDescuento(pedido, cantidad+cantidadActual);
 
                     double promoResta = 0.0;
                     for (Map.Entry<String, Double> entry : promo.entrySet()) {
                         promoResta = entry.getValue();
                     }
 
-                    System.out.println("El descuento a aplicar es de $" + promoResta);
-
                     //Actualizamos el total del pedido
+                    this.total -= pedido.getPrecio() * (cantidadActual);
                     this.total += ((pedido.getPrecio() * (cantidad+cantidadActual)) + promoResta);
-                    this.tiempoEntregaEstimado += (pedido.getTiempoEstimadoPreparacionMn()*(cantidadActual + cantidad));
+                    this.tiempoEntregaEstimado += (pedido.getTiempoEstimadoPreparacionMn()* (cantidad));
 
                     //this.total += pedido.getPrecio() * cantidad;
                     return new ResultadoOperacion(true, "Cantidad del plato incrementada exitosamente");
@@ -190,12 +189,10 @@ public class Pedido {
                 promoResta = entry.getValue();
             }
 
-            System.out.println("El descuento a aplicar es de $" + promoResta);
 
             //Actualizamos el total del pedido
             this.total += ((pedido.getPrecio() * cantidad) + promoResta);
             this.tiempoEntregaEstimado += pedido.getTiempoEstimadoPreparacionMn();
-
             return new ResultadoOperacion(true, "Plato agregado exitosamente");
         } catch (Exception e) {
             return new ResultadoOperacion(false, "No se pudo agregar el plato al pedido " + e);
@@ -204,6 +201,11 @@ public class Pedido {
 
     public ResultadoOperacion borrarPlato(Plato platoABorrar, int cantidad) {
         try {
+            
+            if(this.estadoPedido == EstadoPedido.PREPARADO){
+                return new ResultadoOperacion(false, "No se puede eliminar un plato de un pedido ya preparado");
+            }
+            
             for (HashMap<Plato, Integer> plato : this.platos) {
                 if (plato.containsKey(platoABorrar) && (this.estadoPedido != EstadoPedido.PREPARADO)) {
                     //Restamos el monto de ese plato
@@ -218,13 +220,13 @@ public class Pedido {
                         promoResta = entry.getValue();
                     }
 
-                    this.total -= ((platoABorrar.getPrecio() * cantidadActual) + promoResta);
-                    System.out.println(platoABorrar.getTiempoEstimadoPreparacionMn());
-                    this.tiempoEntregaEstimado -= (platoABorrar.getTiempoEstimadoPreparacionMn()*cantidadActual);
+                    this.total -= ((platoABorrar.getPrecio() * cantidad) + promoResta);
+                    System.out.println("El tiempo a eliminar es de: "+platoABorrar.getTiempoEstimadoPreparacionMn());
+                    System.out.println("Tiempo actual: "+this.tiempoEntregaEstimado);
+                    this.tiempoEntregaEstimado = this.tiempoEntregaEstimado -  platoABorrar.getTiempoEstimadoPreparacionMn();
+                    System.out.println("Tiempo resta: "+this.tiempoEntregaEstimado);
                     this.platos.remove(plato);
                     return new ResultadoOperacion(true, "Plato eliminado exitosamente.");
-                } else {
-                    return new ResultadoOperacion(false, "Si el pedido ya se realizo no se puede eliminar el plato");
                 }
             }
 

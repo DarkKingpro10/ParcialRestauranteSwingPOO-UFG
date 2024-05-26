@@ -114,8 +114,7 @@ public class FormPedidos extends javax.swing.JPanel {
         Pedido pedido = controller.obtenerPedido();
         //Mostramos valores
         txtTotal.setText("$" + Math.round((pedido.getTotal()) * 100.0) / 100.0);
-        System.out.println(tiempoEstimadoMinutos);
-        txtTiempoEMn.setText(tiempoEstimadoMinutos + " minutos");
+        txtTiempoEMn.setText(pedido.getTiempoEntregaEstimado() + " minutos");
     }
 
     //Método para preparar el form para cuando se deba añadir
@@ -159,7 +158,6 @@ public class FormPedidos extends javax.swing.JPanel {
 
     //Método para cargar la tabla de Ingredientes añadidos
     void cargarTablaPlatosAgr(ArrayList<HashMap<Plato, Integer>> platos) {
-        System.out.println("HOLA");
         DefaultTableModel model = new DefaultTableModel();
 
         model.addColumn("ID Plato");

@@ -32,7 +32,6 @@ public class Restaurante {
     }
 
     public static List<Pedido> getPedidos() {
-        System.out.println(pedidos.size());
         return pedidos;
     }
 
@@ -202,8 +201,6 @@ public class Restaurante {
                 coincidencias.add(producto);
             }
         }
-
-        System.out.println(coincidencias.size());
 
         return coincidencias;
     }
@@ -767,7 +764,6 @@ public class Restaurante {
      * @return objeto de tipo {ResultadoOperacion}
      */
     public static ResultadoOperacion modificarPedido(int id, Pedido pedido) {
-        System.out.println("DEBIO MODIFICAR");
         try {
             if (pedido.getCliente().trim().isEmpty()) {
                 return new ResultadoOperacion(false, "El nombre cliente no puede estar vacio");

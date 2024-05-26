@@ -682,6 +682,9 @@ public class FormPlatos extends javax.swing.JPanel {
         } else if (txtCantidadLst.getText().trim().isBlank()) {
             Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe ingresar la cantidad del ingrediente que usará el plato");
             return;
+        } else if(txtCantidadLst.getText().trim().isBlank()){
+            Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Vuelva a seleccionar el plato");
+            return;
         }
 
         int cantidad = Integer.valueOf(txtCantidadLst.getText().trim());
@@ -758,7 +761,6 @@ public class FormPlatos extends javax.swing.JPanel {
         int tiempo = Integer.valueOf(txtTiempoEMn.getText().trim());
 
         //Como cumplio las validaciones entonces ejecutamos la operación
-        System.out.println("DEBIDO MODIFICAR");
         ResultadoOperacion res = controller.mod(txtNombre.getText().trim(), txaDescripcion.getText().trim(), precio, tiempo, tipoSeleccionado);
 
         if (res.isExito()) {
