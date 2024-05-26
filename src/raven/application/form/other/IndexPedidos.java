@@ -2,11 +2,9 @@ package raven.application.form.other;
 
 import application.clasess.Pedido;
 import application.clasess.Plato;
-import application.clasess.Producto;
 import application.controllers.PedidosController;
 import application.enums.EstadoPedido;
 import application.tablesModel.PedidoTableModel;
-import application.tablesModel.PlatosTableModel;
 import application.utils.ButtonEditor;
 import application.utils.CentrarColumnas;
 import application.utils.ButtonRenderer;
@@ -18,10 +16,12 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import raven.application.Application;
 import raven.toast.Notifications;
@@ -55,7 +55,7 @@ public class IndexPedidos extends javax.swing.JPanel {
         lblErrorMsg.setVisible(false);
         txtBusqueda.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Ingrese el #pedido, cliente o fecha para buscar...");
     }
-    
+
     //Método para cargar la tabla
     void cargarTabla(PedidoTableModel model) {
         tblPedidos.setModel(model);
@@ -66,10 +66,10 @@ public class IndexPedidos extends javax.swing.JPanel {
 
         //Añadimos los botones de detalle
         tblPedidos.getColumnModel().getColumn(6).setCellRenderer(new ButtonRenderer(Color.BLACK, iconDetalle, "Visualizar Detalle del pedido"));
-        tblPedidos.getColumnModel().getColumn(6).setCellEditor(new ButtonEditor(new JCheckBox(), tblPedidos));
+        tblPedidos.getColumnModel().getColumn(6).setCellEditor(new ButtonEditor(new JCheckBox(), tblPedidos, Color.BLACK, iconDetalle, "Visualizar Detalle del pedido"));
     }
-    
-    void cargarEstados(){
+
+    void cargarEstados() {
         cmbEstadoF.setModel(controller.obtenerEstados());
     }
 
@@ -83,28 +83,41 @@ public class IndexPedidos extends javax.swing.JPanel {
 
     //Método para mostrar el detalle del pedido
     void mostrarDetalle() {
-        //Creamos el modelo de la tabla
+        // Creamos el modelo de la tabla
         DefaultTableModel modeloDetalle = new DefaultTableModel();
         modeloDetalle.addColumn("Plato");
         modeloDetalle.addColumn("Cantidad");
-        
-        
-        //Llenamos el modelo de la tabla
+        modeloDetalle.addColumn("Precio");
+        modeloDetalle.addColumn("SubTotal");
+
+        // Llenamos el modelo de la tabla
         ArrayList<HashMap<Plato, Integer>> platos = pedidoSeleccionado.getPlatos();
+        double total = 0.0;
 
         for (HashMap<Plato, Integer> pedido : platos) {
             for (Map.Entry<Plato, Integer> entry : pedido.entrySet()) {
                 Plato plato = entry.getKey();
                 Integer cantidad = entry.getValue();
-                modeloDetalle.addRow(new Object[]{plato.getNombrePlato(), cantidad});
+                double subtotal = plato.getPrecio() * cantidad;
+                total += subtotal;
+                modeloDetalle.addRow(new Object[]{plato.getNombrePlato(), cantidad, plato.getPrecio(), subtotal});
             }
         }
+
+        // Añadir la fila de Total al final
+        modeloDetalle.addRow(new Object[]{"", "", "Total", total});
 
         // Crear y mostrar la tabla de detalle en un diálogo
         tablaDetalle = new JTable(modeloDetalle);
         tablaDetalle.setDefaultRenderer(Object.class, new CentrarColumnas());
+
+        // Centrar la columna del "Total"
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        tablaDetalle.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
+
         JScrollPane scrollPane = new JScrollPane(tablaDetalle);
-        JOptionPane.showMessageDialog(null, scrollPane, "Detalle del pedido: " + (pedidoSeleccionado.getIdPedido()), JOptionPane.PLAIN_MESSAGE);
+        JOptionPane.showMessageDialog(null, scrollPane, "Detalle del pedido: " + pedidoSeleccionado.getIdPedido(), JOptionPane.PLAIN_MESSAGE);
     }
 
     //Deshabilitar o Habilitar form
@@ -143,11 +156,11 @@ public class IndexPedidos extends javax.swing.JPanel {
         lb.setText("Listado de Pedidos");
         jPanel1.add(lb, java.awt.BorderLayout.PAGE_START);
 
-        btnDel.setBackground(javax.swing.UIManager.getDefaults().getColor("Actions.Red"));
+        btnDel.setBackground(new java.awt.Color(0, 255, 153));
         btnDel.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         btnDel.setForeground(new java.awt.Color(0, 0, 0));
-        btnDel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/raven/icon/png/del-icon.png"))); // NOI18N
-        btnDel.setText("Eliminar");
+        btnDel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/raven/icon/png/pagar-icon.png"))); // NOI18N
+        btnDel.setText("Finalizar");
         btnDel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnDelActionPerformed(evt);
@@ -337,15 +350,20 @@ public class IndexPedidos extends javax.swing.JPanel {
 
     private void btnModActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModActionPerformed
         int row = tblPedidos.getSelectedRow();
+        EstadoPedido estado = pedidoSeleccionado.getEstadoPedido();
         if (row != -1 && idPedido > 0) {
-            //Application.showForm(new FormPlatos(idPlato));
+            if(estado != EstadoPedido.PAGADO){
+                Application.showForm(new FormPedidos(idPedido));
+            }else{
+               Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "No puede modificar un pedido ya pagado"); 
+            }
         } else {
             Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe seleccionar un plato");
         }
     }//GEN-LAST:event_btnModActionPerformed
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
-        //Application.showForm(new FormPlatos());
+        Application.showForm(new FormPedidos());
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void tblPedidosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblPedidosMouseClicked

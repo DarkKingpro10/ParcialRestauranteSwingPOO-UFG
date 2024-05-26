@@ -22,21 +22,26 @@ import raven.toast.Notifications;
  * @author Jesus Esquivel
  */
 public class PlatosController {
+
     private final Plato plato;
+
     //Método para inicializar el plato a añadirse
-    public  PlatosController(){
+    public PlatosController() {
         plato = new Plato();
-    };
+    }
+
+    ;
     
     //Método para inicializar el plato a modificarse
-    public PlatosController(int id){
+    public PlatosController(int id) {
         plato = Restaurante.buscarPlato(id);
-        
-        if(plato == null){
+
+        if (plato == null) {
             Notifications.getInstance().show(Notifications.Type.INFO, Notifications.Location.TOP_RIGHT, "El plato no se ha encontrado");
             Application.showForm(new IndexPlatos());
         }
     }
+
     //Método para obtener los platos
     public PlatosTableModel obtenerPlatosTModel() {
         /*TipoPlato tipo = new TipoPlato(1, "Bebida", true);
@@ -103,9 +108,10 @@ public class PlatosController {
 
         return model;
     }
-    
-    public InventarioTableModel obtenerIngredientes(){
-         List<Producto> productos = Restaurante.obtenerProductosExistentes();
+
+    //Método para obtener los ingredientes para llenar la tabla
+    public InventarioTableModel obtenerIngredientes() {
+        List<Producto> productos = Restaurante.obtenerProductosExistentes();
 
         if (productos.size() <= 0) {
             FormPlatos.lblErrorMsg.setVisible(true);
@@ -116,82 +122,91 @@ public class PlatosController {
 
         return new InventarioTableModel(productos);
     }
-    
+
     /**
      * Método para buscar los productos que coincidan
+     *
      * @param query Representa el parametro a buscar
      * @return modelo de la tabla
      */
     public InventarioTableModel buscarProductos(String query) {
         List<Producto> productos = Restaurante.buscarProductos(query);
-        
+
         if (productos.size() <= 0) {
             Notifications.getInstance().show(Notifications.Type.INFO, Notifications.Location.TOP_RIGHT, "No hay coincidencias");
         }
 
         return new InventarioTableModel(productos);
     }
-    
-    //Método para obtener los ingredientes añadidos al plato
-    public DefaultTableModel obtenerIngredientesAgr(){
-        DefaultTableModel modelo = new DefaultTableModel();
-        modelo.addColumn("ID Producto");
-        modelo.addColumn("Ingrediente");
-        modelo.addColumn("Cantidad");
-        modelo.addColumn("Eliminar Ingrediente");
 
-        for (HashMap<Producto, Integer> ingrediente : plato.getIngredientes()) {
-            for (Map.Entry<Producto, Integer> entry : ingrediente.entrySet()) {
-                Producto producto = entry.getKey();
-                Integer cantidad = entry.getValue();
-                modelo.addRow(new Object[]{producto.getIdProducto(),producto.getNombreProducto(), cantidad,""});
+    //Método para obtener los ingredientes añadidos al plato
+    public DefaultTableModel obtenerIngredientesAgr() {
+        DefaultTableModel modelo = new DefaultTableModel();
+            modelo.addColumn("ID Producto");
+            modelo.addColumn("Ingrediente");
+            modelo.addColumn("Cantidad");
+            modelo.addColumn("Eliminar Ingrediente");
+        try {
+            
+
+            for (HashMap<Producto, Integer> ingrediente : plato.getIngredientes()) {
+                for (Map.Entry<Producto, Integer> entry : ingrediente.entrySet()) {
+                    Producto producto = entry.getKey();
+                    Integer cantidad = entry.getValue();
+                    modelo.addRow(new Object[]{producto.getIdProducto(), producto.getNombreProducto(), cantidad, ""});
+                }
             }
+
+            return modelo;
+        } catch(Exception e){
+            System.out.println(e);
         }
         
         return modelo;
     }
 
     //Método para añadir inrgediente al plato
-    public ResultadoOperacion addIngrediente(int IdProducto, int cantidad){
+    public ResultadoOperacion addIngrediente(int IdProducto, int cantidad) {
         //Obtenemos el producto
         Producto ingrediente = Restaurante.buscarProducto(IdProducto);
-        
+
         ResultadoOperacion res = plato.agregarIngrediente(ingrediente, cantidad);
-        
+
         return res;
     }
-    
+
     //Método para eliminar un ingrediente del plato
-    public ResultadoOperacion delIngrediente(int IdProducto){
+    public ResultadoOperacion delIngrediente(int IdProducto) {
         //Obtenemos el producto
         Producto ingrediente = Restaurante.buscarProducto(IdProducto);
-        
+
         ResultadoOperacion res = plato.borrarIngrediente(ingrediente);
-        
+
         return res;
     }
-    
+
     //Método para obtener los ingredientes según la busqueda
-    public DefaultTableModel buscarIngredientes(String query){
+    public DefaultTableModel buscarIngredientes(String query) {
         DefaultTableModel modelo = new DefaultTableModel();
         modelo.addColumn("ID Producto");
         modelo.addColumn("Ingrediente");
         modelo.addColumn("Cantidad");
         modelo.addColumn("Eliminar Ingrediente");
-        
+
         for (HashMap<Producto, Integer> ingrediente : plato.buscarIngredientes(query)) {
             for (Map.Entry<Producto, Integer> entry : ingrediente.entrySet()) {
                 Producto producto = entry.getKey();
                 Integer cantidad = entry.getValue();
-                modelo.addRow(new Object[]{producto.getIdProducto(),producto.getNombreProducto(), cantidad,""});
+                modelo.addRow(new Object[]{producto.getIdProducto(), producto.getNombreProducto(), cantidad, ""});
             }
         }
-        
+
         return modelo;
     }
-            
+
     /**
      * Método para añadir un plato al restaurante
+     *
      * @param nombre representa el nombre del plato
      * @param descripcion representa la descripción del plato
      * @param precio representa el precio
@@ -202,19 +217,20 @@ public class PlatosController {
         plato.setNombrePlato(nombre);
         plato.setTipoPlato(tipo);
         plato.setDescripcion(descripcion);
-        plato.setPrecio(precio);
+        plato.setPrecio(Math.round(precio * 100.0) / 100.0);
         plato.setTiempoEstimadoPreparacionMn(tiempo);
-        
+
         return Restaurante.agregarPlato(plato);
     }
-    
+
     //Método para obtener el plato que esta siendo modificado
-    public Plato obtenerPlato(){
+    public Plato obtenerPlato() {
         return plato;
     }
-    
+
     /**
      * Método para añadir un plato al restaurante
+     *
      * @param nombre representa el nombre del plato
      * @param descripcion representa la descripción del plato
      * @param precio representa el precio
@@ -225,9 +241,9 @@ public class PlatosController {
         plato.setNombrePlato(nombre);
         plato.setTipoPlato(tipo);
         plato.setDescripcion(descripcion);
-        plato.setPrecio(precio);
+        plato.setPrecio(Math.round(precio * 100.0) / 100.0);
         plato.setTiempoEstimadoPreparacionMn(tiempo);
-        
-        return Restaurante.modificarPlato(plato.getIdPlato(),plato);
+
+        return Restaurante.modificarPlato(plato.getIdPlato(), plato);
     }
 }

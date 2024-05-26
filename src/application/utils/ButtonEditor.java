@@ -8,25 +8,26 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class ButtonEditor extends DefaultCellEditor {
+
     private JButton button;
     private String label;
     private boolean isPushed;
     private JTable table;
 
-    public ButtonEditor(JCheckBox checkBox, JTable table) {
+    public ButtonEditor(JCheckBox checkBox, JTable table, Color color, ImageIcon icon, String tooltip) {
         super(checkBox);
         this.table = table;
         button = new JButton("Editar");
         button.setOpaque(true);
-        button.setBackground(Color.BLACK);
+        button.setBackground(color);
         button.setForeground(Color.WHITE);
-        button.setToolTipText("Visualizar los ingredientes");
-        button.setIcon(new ImageIcon(Restaurante.class.getResource("/raven/icon/png/view-icon.png"))); // Asegúrate de que la ruta sea correcta
+        button.setToolTipText(tooltip);
+        button.setIcon(icon); // Asegúrate de que la ruta sea correcta
         button.setPreferredSize(new Dimension(25, 25));
         button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 fireEditingStopped();
-                String row = (String) table.getValueAt(table.getSelectedRow(), 0);
+                //String row = (String) table.getValueAt(table.getSelectedRow(), 0);
                 //int id = ((PlatosTableModel) table.getModel()).getIdAt(row);
                 // Aquí puedes llamar al método que necesites con el ID del plato
             }
@@ -35,10 +36,19 @@ public class ButtonEditor extends DefaultCellEditor {
 
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-        label = (value == null) ? "" : value.toString();
-        button.setText(label);
-        isPushed = true;
-        return button;
+        //label = (value == null) ? "" : value.toString();
+        //button.setText(label);
+        //isPushed = true;
+        //return button;
+
+        if (table.getValueAt(row, 0) != null && !table.getValueAt(row, 0).toString().isEmpty()) {
+            label = (value == null) ? "" : value.toString();
+            button.setText(label);
+            isPushed = true;
+            return button;
+        } else {
+            return null; // No editar nada para filas de descuento
+        }
     }
 
     @Override

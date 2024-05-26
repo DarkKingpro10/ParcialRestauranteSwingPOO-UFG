@@ -1,9 +1,11 @@
 package raven.application.form.other;
 
+import application.clasess.Pedido;
 import application.clasess.Plato;
-import application.clasess.Producto;
+import application.clasess.Restaurante;
 import application.clasess.TipoPlato;
-import application.controllers.PlatosController;
+import application.controllers.PedidosController;
+import application.enums.EstadoPedido;
 import application.tablesModel.InventarioTableModel;
 import application.utils.ButtonEditor;
 import application.utils.ButtonRenderer;
@@ -14,6 +16,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -26,26 +29,29 @@ import raven.toast.Notifications;
  *
  * @author Raven
  */
-public class FormPlatos extends javax.swing.JPanel {
+public class FormPedidos extends javax.swing.JPanel {
 
     //Atributos de la clase
+    private int idPedido;
     private int idPlato;
-    private int idProducto;
+    private double total = 0;
+    private int tiempoEstimadoMinutos = 0;
+    public static Object estado = "Seleccionar Estado";
     ImageIcon iconDetalle = new ImageIcon(Application.class.getResource("/raven/icon/png/del-small-icon.png"));
     //Importando Validaciones
     Validaciones validaciones = new Validaciones();
     //Importando controlador
-    PlatosController controller;
+    PedidosController controller;
 
-    public FormPlatos() {
+    public FormPedidos() {
         initComponents();
         prepararAdd();
         inicializarCampos();
     }
 
-    public FormPlatos(int id) {
+    public FormPedidos(int id) {
         initComponents();
-        this.idPlato = id;
+        this.idPedido = id;
         prepararMod();
         inicializarCampos();
     }
@@ -58,112 +64,175 @@ public class FormPlatos extends javax.swing.JPanel {
 
         lblErrorMsg.setVisible(false);
 
-        txtNombre.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Plato tipico ...");
-        txtTiempoEMn.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "15...");
-        txtPrecio.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "7.50...");
-        txaDescripcion.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Plato tipico salvadoreño que incluye platanos ...");
+        txtNombre.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Nombre del cliente ...");
 
         //Validaciones
-        JComponent[] componentesAValidar = {txtNombre, txtPrecio, txtTiempoEMn};
+        JComponent[] componentesAValidar = {txtNombre};
         validaciones.noPegar(componentesAValidar);
 
-        tblIngredientesLst.setDefaultRenderer(Object.class, new CentrarColumnas());
-        tblIngredientesLst.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblIngredientesAgr.setDefaultRenderer(Object.class, new CentrarColumnas());
-        tblIngredientesAgr.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblPlatosLst.setDefaultRenderer(Object.class, new CentrarColumnas());
+        tblPlatosLst.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblPlatosAgr.setDefaultRenderer(Object.class, new CentrarColumnas());
+        tblPlatosAgr.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         //Cargamos las tablas
-        cargarTablaIngredientesLst(controller.obtenerIngredientes());
-        cargarTablaIngredientesAgr(controller.obtenerIngredientesAgr());
+        cargarTablaPlatosLst(controller.obtenerPlatos());
+        cargarTablaPlatosAgr(controller.obtenerPlatosAgr());
+    }
+
+    //Método para asignar el total a pagar y el tiempo estimado en minutos
+    void recalcular() {
+        //Obtenemos los platos agregados
+        /*ArrayList<HashMap<Plato, Integer>> platos = controller.obtenerPlatosAgr();
+
+        //Los recorremos 
+        for (HashMap<Plato, Integer> map : platos) {
+            //Al ser un HashMap necesitamos obtener sus llaves tmb por ende los recorremos
+            for (Map.Entry<Plato, Integer> entry : map.entrySet()) {
+                Plato plato = entry.getKey(); //Creamos un objeto de tipo plato
+                int cantidad = entry.getValue();//Obtenemos la cantidad
+
+                //Calculamos el subtotal
+                double subTotal = plato.getPrecio() * cantidad;
+                double promo = 0.0;
+
+                // Consultar descuento que devuelve un HashMap
+                HashMap<String, Double> descuento = Restaurante.consultarDescuento(plato, cantidad);
+                //Recorremos el hashMap
+                for (Map.Entry<String, Double> desc : descuento.entrySet()) {
+                    if (!desc.getKey().isEmpty()) {//Validamos que si halla promoción
+                        promo = desc.getValue();//Asignamos el descuento
+                    }
+                }
+                
+                //Asignamos valores
+                total = Math.round((total + (subTotal - promo)) * 100.0) / 100.0;
+                tiempoEstimadoMinutos += plato.getTiempoEstimadoPreparacionMn();
+            }
+        }*/
+
+        Pedido pedido = controller.obtenerPedido();
+        //Mostramos valores
+        txtTotal.setText("$" + Math.round((pedido.getTotal()) * 100.0) / 100.0);
+        System.out.println(tiempoEstimadoMinutos);
+        txtTiempoEMn.setText(tiempoEstimadoMinutos + " minutos");
     }
 
     //Método para preparar el form para cuando se deba añadir
     void prepararAdd() {
-        controller = new PlatosController();
-        lb.setText("Agregar Plato");
+        controller = new PedidosController();
+        lb.setText("Agregar Pedido");
         btnMod.setVisible(false);
-        cargarTipoPlatos();
+
+        cargarEstados();
     }
 
     //Método para preparar el formulario cuando se debe modificar
     void prepararMod() {
-        controller = new PlatosController(idPlato);
-        lb.setText("Modificar Plato");
+        controller = new PedidosController(idPedido);
+        lb.setText("Modificar Pedido");
         btnAdd.setVisible(false);
-        Plato plato = controller.obtenerPlato();
+        Pedido pedido = controller.obtenerPedido();
 
-        txtNombre.setText(plato.getNombrePlato());
-        txtTiempoEMn.setText(String.valueOf(plato.getTiempoEstimadoPreparacionMn()));
-        txtPrecio.setText(String.valueOf(plato.getPrecio()));
-        txaDescripcion.setText(plato.getDescripcion());
+        txtNombre.setText(pedido.getCliente());
+        tiempoEstimadoMinutos = pedido.getTiempoEntregaEstimado();
+        total = pedido.getTotal();
 
         //Seteamos el combobox
-        cargarTipoPlatos();
-        if (!plato.getTipoPlato().isDisponibilidad()) {
-            Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "El tipo plato fue eliminado, seleccione uno nuevo");
-        } else {
-            cmbTipoPlato.setSelectedItem(plato.getTipoPlato());
-        }
+        cargarEstados();
+        cmbEstado.setSelectedItem(pedido.getEstadoPedido());
 
     }
 
     //Método para inicializar el combobox
-    void cargarTipoPlatos() {
-        cmbTipoPlato.setModel(controller.obtenerTiposPlatos());
+    void cargarEstados() {
+        cmbEstado.setModel(controller.obtenerEstadosForForm());
     }
 
     //Método para cargar el listado de los Ingredientes a añadir
-    void cargarTablaIngredientesLst(InventarioTableModel model) {
-        tblIngredientesLst.setModel(model);
-        tblIngredientesLst.getColumnModel().getColumn(1).setMaxWidth(0);
-        tblIngredientesLst.getColumnModel().getColumn(1).setMinWidth(0);
-        tblIngredientesLst.getColumnModel().getColumn(1).setPreferredWidth(0);
+    void cargarTablaPlatosLst(DefaultTableModel model) {
+        tblPlatosLst.setModel(model);
+        tblPlatosLst.getColumnModel().getColumn(0).setMaxWidth(0);
+        tblPlatosLst.getColumnModel().getColumn(0).setMinWidth(0);
+        tblPlatosLst.getColumnModel().getColumn(0).setPreferredWidth(0);
     }
 
     //Método para cargar la tabla de Ingredientes añadidos
-    void cargarTablaIngredientesAgr(DefaultTableModel model) {
-        tblIngredientesAgr.setModel(model);
-        tblIngredientesAgr.getColumnModel().getColumn(0).setMaxWidth(0);
-        tblIngredientesAgr.getColumnModel().getColumn(0).setMinWidth(0);
-        tblIngredientesAgr.getColumnModel().getColumn(0).setPreferredWidth(0);
+    void cargarTablaPlatosAgr(ArrayList<HashMap<Plato, Integer>> platos) {
+        System.out.println("HOLA");
+        DefaultTableModel model = new DefaultTableModel();
 
-        tblIngredientesAgr.getColumnModel().getColumn(3).setMaxWidth(100);
-        tblIngredientesAgr.getColumnModel().getColumn(3).setMinWidth(100);
+        model.addColumn("ID Plato");
+        model.addColumn("Nombre Plato");
+        model.addColumn("Cantidad");
+        model.addColumn("SubTotal");
+        model.addColumn("Acción");
 
-        tblIngredientesAgr.getColumnModel().getColumn(3).setCellRenderer(new ButtonRenderer(Color.RED, iconDetalle, "Eliminar ingrediente"));
-        tblIngredientesAgr.getColumnModel().getColumn(3).setCellEditor(new ButtonEditor(new JCheckBox(), tblIngredientesLst, Color.RED, iconDetalle, "Eliminar ingrediente"));
+        tblPlatosAgr.setModel(model);
+        tblPlatosAgr.getColumnModel().getColumn(0).setMaxWidth(0);
+        tblPlatosAgr.getColumnModel().getColumn(0).setMinWidth(0);
+        tblPlatosAgr.getColumnModel().getColumn(0).setPreferredWidth(0);
+
+        tblPlatosAgr.getColumnModel().getColumn(4).setMaxWidth(150);
+        tblPlatosAgr.getColumnModel().getColumn(4).setMinWidth(150);
+
+        for (HashMap<Plato, Integer> map : platos) {
+            for (Map.Entry<Plato, Integer> entry : map.entrySet()) {
+                Plato plato = entry.getKey();
+                int cantidad = entry.getValue();
+
+                double subTotal = plato.getPrecio() * cantidad;
+                double promo = 0.0;
+
+                // Añadir fila del plato
+                model.addRow(new Object[]{plato.getIdPlato(), plato.getNombrePlato(), cantidad, "$" + subTotal, "Eliminar"});
+
+                // Consultar descuento
+                HashMap<String, Double> descuento = Restaurante.consultarDescuento(plato, cantidad);
+                for (Map.Entry<String, Double> desc : descuento.entrySet()) {
+                    if (desc.getValue() != 0.0) {
+                        promo = desc.getValue();
+                        model.addRow(new Object[]{"", desc.getKey(), "", desc.getValue(), ""});
+                    }
+                }
+                total = Math.round((total + (subTotal - promo)) * 100.0) / 100.0;
+                tiempoEstimadoMinutos += plato.getTiempoEstimadoPreparacionMn();
+            }
+        }
+        tblPlatosAgr.getColumnModel().getColumn(4).setCellRenderer(new ButtonRenderer(Color.RED, iconDetalle, "Eliminar plato"));
+        tblPlatosAgr.getColumnModel().getColumn(4).setCellEditor(new ButtonEditor(new JCheckBox(), tblPlatosAgr, Color.RED, iconDetalle, "Eliminar plato"));
+        recalcular();
     }
 
     //Método para reiniciar el formulario general
     void reiniciarFormGeneral() {
-        cargarTipoPlatos();
+        cargarEstados();
         txtNombre.setText("");
-        txtPrecio.setText("");
+        txtTotal.setText("");
         txtTiempoEMn.setText("");
-        txaDescripcion.setText("");
-        idProducto = 0;
+        idPlato = 0;
     }
 
     //Método para reiniciar el formulario de agregar ingrediente
     void reiniciarFormPA() {
-        idProducto = 0;
+        idPlato = 0;
         txtCantidadLst.setText("");
-        txtIngredientesLst.setText("");
+        txtPlatosLst.setText("");
     }
 
     //Método para habilitar e inhabilitar el formulario
     void toggleEnableForm() {
         txtNombre.setEnabled(!txtNombre.isEnabled());
-        txtPrecio.setEnabled(!txtPrecio.isEnabled());
+        txtTotal.setEnabled(!txtTotal.isEnabled());
         txtTiempoEMn.setEnabled(!txtTiempoEMn.isEnabled());
-        txaDescripcion.setEnabled(!txaDescripcion.isEnabled());
+        cmbEstado.setEnabled(!cmbEstado.isEnabled());
         btnAdd.setEnabled(!btnAdd.isEnabled());
         btnMod.setEnabled(!btnMod.isEnabled());
     }
 
     //Método para regresar al anterior form
     void regresarAIndex() {
-        Application.showForm(new IndexPlatos());
+        Application.showForm(new IndexPedidos());
     }
 
     @SuppressWarnings("unchecked")
@@ -177,34 +246,31 @@ public class FormPlatos extends javax.swing.JPanel {
         jPanel3 = new javax.swing.JPanel();
         txtNombre = new javax.swing.JTextField();
         lbUser = new javax.swing.JLabel();
-        lbUser1 = new javax.swing.JLabel();
-        txtTiempoEMn = new javax.swing.JTextField();
-        lbUser2 = new javax.swing.JLabel();
-        txtPrecio = new javax.swing.JTextField();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        txaDescripcion = new javax.swing.JTextArea();
         lbUser3 = new javax.swing.JLabel();
-        cmbTipoPlato = new javax.swing.JComboBox<>();
+        cmbEstado = new javax.swing.JComboBox<>();
         lbUser4 = new javax.swing.JLabel();
+        txtTotal = new javax.swing.JTextField();
+        lbUser5 = new javax.swing.JLabel();
+        txtTiempoEMn = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         jPanel5 = new javax.swing.JPanel();
         jPanel8 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         btnBuscarILst = new javax.swing.JButton();
-        txtIngredientesLst = new javax.swing.JTextField();
+        txtPlatosLst = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
         jScrollPane3 = new javax.swing.JScrollPane();
-        tblIngredientesLst = new javax.swing.JTable();
+        tblPlatosLst = new javax.swing.JTable();
         jLabel6 = new javax.swing.JLabel();
         txtCantidadLst = new javax.swing.JTextField();
-        btnAddIngr = new javax.swing.JButton();
+        btnAddPlt = new javax.swing.JButton();
         jPanel7 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
-        btnBuscarIAgr = new javax.swing.JButton();
+        btnBuscarPAgr = new javax.swing.JButton();
         txtIngredientesAgr = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        tblIngredientesAgr = new javax.swing.JTable();
+        tblPlatosAgr = new javax.swing.JTable();
         pnlFooter = new javax.swing.JPanel();
         btnAdd = new javax.swing.JButton();
         btnMod = new javax.swing.JButton();
@@ -227,34 +293,30 @@ public class FormPlatos extends javax.swing.JPanel {
             }
         });
 
-        lbUser.setText("Nombre Plato:");
-
-        lbUser1.setText("Tiempo Preparación Estimado (En minutos):");
-
-        txtTiempoEMn.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                txtTiempoEMnKeyTyped(evt);
-            }
-        });
-
-        lbUser2.setText("Precio ($) Plato:");
-
-        txtPrecio.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                txtPrecioKeyTyped(evt);
-            }
-        });
-
-        txaDescripcion.setColumns(20);
-        txaDescripcion.setRows(5);
-        jScrollPane1.setViewportView(txaDescripcion);
+        lbUser.setText("Nombre Cliente:");
 
         lbUser3.setText("Descripción del Plato:");
         lbUser3.setToolTipText("");
 
-        cmbTipoPlato.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccione un Tipo de Plato" }));
+        cmbEstado.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccione un Tipo de Plato" }));
 
-        lbUser4.setText("Tipo Plato:");
+        lbUser4.setText("Estado Pedido");
+
+        txtTotal.setEditable(false);
+        txtTotal.setFont(new java.awt.Font("Segoe UI", 3, 24)); // NOI18N
+        txtTotal.setForeground(new java.awt.Color(204, 0, 51));
+        txtTotal.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        txtTotal.setText("$150.5");
+        txtTotal.setFocusable(false);
+
+        lbUser5.setText("Tiempo estimado de preparación:");
+        lbUser5.setToolTipText("");
+
+        txtTiempoEMn.setEditable(false);
+        txtTiempoEMn.setFont(new java.awt.Font("Segoe UI", 3, 24)); // NOI18N
+        txtTiempoEMn.setForeground(new java.awt.Color(255, 255, 0));
+        txtTiempoEMn.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        txtTiempoEMn.setText("15MINUTOS");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -262,53 +324,45 @@ public class FormPlatos extends javax.swing.JPanel {
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(lbUser, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 240, Short.MAX_VALUE)
-                    .addComponent(txtNombre))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(lbUser1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtTiempoEMn, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, Short.MAX_VALUE)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(lbUser2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtPrecio, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lbUser, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtNombre, javax.swing.GroupLayout.DEFAULT_SIZE, 240, Short.MAX_VALUE)
+                    .addComponent(lbUser3, javax.swing.GroupLayout.DEFAULT_SIZE, 240, Short.MAX_VALUE)
+                    .addComponent(txtTotal))
+                .addGap(184, 184, 184)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lbUser3, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(cmbTipoPlato, javax.swing.GroupLayout.PREFERRED_SIZE, 280, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lbUser4, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cmbEstado, javax.swing.GroupLayout.PREFERRED_SIZE, 280, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lbUser4, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(lbUser5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(txtTiempoEMn, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
                         .addComponent(lbUser)
-                        .addGap(18, 18, 18)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(lbUser2)
-                        .addGap(18, 18, 18)
-                        .addComponent(txtPrecio, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                        .addComponent(lbUser1)
-                        .addGap(18, 18, 18)
-                        .addComponent(txtTiempoEMn, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lbUser3)
-                    .addComponent(lbUser4))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmbTipoPlato, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(lbUser4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cmbEstado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(12, 12, 12)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(lbUser5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtTiempoEMn, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(lbUser3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/raven/icon/png/regresar-icon.png"))); // NOI18N
@@ -323,7 +377,7 @@ public class FormPlatos extends javax.swing.JPanel {
         jPanel5.setLayout(new java.awt.GridLayout(1, 2));
 
         jLabel3.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jLabel3.setText("Listado de Ingredientes a añadir");
+        jLabel3.setText("Listado de Platos a añadir");
 
         btnBuscarILst.setBackground(javax.swing.UIManager.getDefaults().getColor("Actions.Blue"));
         btnBuscarILst.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
@@ -336,31 +390,36 @@ public class FormPlatos extends javax.swing.JPanel {
             }
         });
 
-        txtIngredientesLst.addKeyListener(new java.awt.event.KeyAdapter() {
+        txtPlatosLst.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
-                txtIngredientesLstKeyTyped(evt);
+                txtPlatosLstKeyTyped(evt);
             }
         });
 
-        jLabel5.setText("Ingrediente a buscar/Añadir:");
+        jLabel5.setText("Platos a buscar/Añadir:");
 
-        tblIngredientesLst.setModel(new javax.swing.table.DefaultTableModel(
+        tblPlatosLst.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "Nombre Plato"
             }
-        ));
-        tblIngredientesLst.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                tblIngredientesLstMouseClicked(evt);
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
             }
         });
-        jScrollPane3.setViewportView(tblIngredientesLst);
+        tblPlatosLst.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblPlatosLstMouseClicked(evt);
+            }
+        });
+        jScrollPane3.setViewportView(tblPlatosLst);
 
         jLabel6.setText("Cantidad a Agregar:");
 
@@ -370,15 +429,15 @@ public class FormPlatos extends javax.swing.JPanel {
             }
         });
 
-        btnAddIngr.setBackground(javax.swing.UIManager.getDefaults().getColor("Actions.Green"));
-        btnAddIngr.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        btnAddIngr.setForeground(new java.awt.Color(0, 0, 0));
-        btnAddIngr.setIcon(new javax.swing.ImageIcon(getClass().getResource("/raven/icon/png/add-small-icon.png"))); // NOI18N
-        btnAddIngr.setText("Agregar");
-        btnAddIngr.setToolTipText("Agregar Ingrediente al plato");
-        btnAddIngr.addActionListener(new java.awt.event.ActionListener() {
+        btnAddPlt.setBackground(javax.swing.UIManager.getDefaults().getColor("Actions.Green"));
+        btnAddPlt.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnAddPlt.setForeground(new java.awt.Color(0, 0, 0));
+        btnAddPlt.setIcon(new javax.swing.ImageIcon(getClass().getResource("/raven/icon/png/add-small-icon.png"))); // NOI18N
+        btnAddPlt.setText("Agregar");
+        btnAddPlt.setToolTipText("Agregar Ingrediente al plato");
+        btnAddPlt.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnAddIngrActionPerformed(evt);
+                btnAddPltActionPerformed(evt);
             }
         });
 
@@ -392,19 +451,19 @@ public class FormPlatos extends javax.swing.JPanel {
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addGroup(jPanel8Layout.createSequentialGroup()
                         .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtIngredientesLst)
+                            .addComponent(txtPlatosLst)
                             .addComponent(txtCantidadLst, javax.swing.GroupLayout.DEFAULT_SIZE, 289, Short.MAX_VALUE)
                             .addComponent(jLabel5)
                             .addComponent(jLabel6))
                         .addGap(18, 18, 18)
                         .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(btnBuscarILst)
-                            .addComponent(btnAddIngr))))
+                            .addComponent(btnAddPlt))))
                 .addGap(50, 50, 50))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel8Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel3)
-                .addGap(121, 121, 121))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel8Layout.setVerticalGroup(
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -417,13 +476,13 @@ public class FormPlatos extends javax.swing.JPanel {
                     .addGroup(jPanel8Layout.createSequentialGroup()
                         .addComponent(jLabel5)
                         .addGap(7, 7, 7)
-                        .addComponent(txtIngredientesLst, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(txtPlatosLst, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(7, 7, 7)
                 .addComponent(jLabel6)
                 .addGap(6, 6, 6)
                 .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtCantidadLst, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnAddIngr))
+                    .addComponent(btnAddPlt))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -432,16 +491,16 @@ public class FormPlatos extends javax.swing.JPanel {
         jPanel5.add(jPanel8);
 
         jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jLabel2.setText("Listado de Ingredientes añadidos");
+        jLabel2.setText("Listado de Platos añadidos");
 
-        btnBuscarIAgr.setBackground(javax.swing.UIManager.getDefaults().getColor("Actions.Blue"));
-        btnBuscarIAgr.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        btnBuscarIAgr.setForeground(new java.awt.Color(0, 0, 0));
-        btnBuscarIAgr.setIcon(new javax.swing.ImageIcon(getClass().getResource("/raven/icon/png/search-icon.png"))); // NOI18N
-        btnBuscarIAgr.setText("Buscar");
-        btnBuscarIAgr.addActionListener(new java.awt.event.ActionListener() {
+        btnBuscarPAgr.setBackground(javax.swing.UIManager.getDefaults().getColor("Actions.Blue"));
+        btnBuscarPAgr.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnBuscarPAgr.setForeground(new java.awt.Color(0, 0, 0));
+        btnBuscarPAgr.setIcon(new javax.swing.ImageIcon(getClass().getResource("/raven/icon/png/search-icon.png"))); // NOI18N
+        btnBuscarPAgr.setText("Buscar");
+        btnBuscarPAgr.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnBuscarIAgrActionPerformed(evt);
+                btnBuscarPAgrActionPerformed(evt);
             }
         });
 
@@ -453,7 +512,7 @@ public class FormPlatos extends javax.swing.JPanel {
 
         jLabel4.setText("Ingrediente a buscar:");
 
-        tblIngredientesAgr.setModel(new javax.swing.table.DefaultTableModel(
+        tblPlatosAgr.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -464,12 +523,12 @@ public class FormPlatos extends javax.swing.JPanel {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        tblIngredientesAgr.addMouseListener(new java.awt.event.MouseAdapter() {
+        tblPlatosAgr.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                tblIngredientesAgrMouseClicked(evt);
+                tblPlatosAgrMouseClicked(evt);
             }
         });
-        jScrollPane2.setViewportView(tblIngredientesAgr);
+        jScrollPane2.setViewportView(tblPlatosAgr);
 
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
@@ -490,7 +549,7 @@ public class FormPlatos extends javax.swing.JPanel {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 164, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(txtIngredientesAgr, javax.swing.GroupLayout.DEFAULT_SIZE, 297, Short.MAX_VALUE))
                         .addGap(18, 18, 18)
-                        .addComponent(btnBuscarIAgr)))
+                        .addComponent(btnBuscarPAgr)))
                 .addGap(50, 50, 50))
         );
         jPanel7Layout.setVerticalGroup(
@@ -500,7 +559,7 @@ public class FormPlatos extends javax.swing.JPanel {
                 .addComponent(jLabel2)
                 .addGap(15, 15, 15)
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(btnBuscarIAgr)
+                    .addComponent(btnBuscarPAgr)
                     .addGroup(jPanel7Layout.createSequentialGroup()
                         .addComponent(jLabel4)
                         .addGap(7, 7, 7)
@@ -604,34 +663,17 @@ public class FormPlatos extends javax.swing.JPanel {
         validaciones.soloLetras(evt, 2, txtNombre.getText());
     }//GEN-LAST:event_txtNombreKeyTyped
 
-    private void txtTiempoEMnKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtTiempoEMnKeyTyped
-        //Validamos que solo acepte numewros
-        validaciones.soloNumeros(evt, 1, txtTiempoEMn.getText());
-    }//GEN-LAST:event_txtTiempoEMnKeyTyped
-
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         //Deshabilitamos los botones
         toggleEnableForm();
-        TipoPlato tipoSeleccionado = (TipoPlato) cmbTipoPlato.getSelectedItem();
-        if (tipoSeleccionado.getIdTipoPlato() == -1 || tipoSeleccionado == null) {
-            Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe seleccionar un tipo de plato");
-            toggleEnableForm();
-            return;
-        } else if (txtTiempoEMn.getText().trim().isBlank()) {
-            Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe ingresar el tiempo de realización estimado");
-            toggleEnableForm();
-            return;
-        } else if (txtPrecio.getText().trim().isBlank()) {
-            Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "El precio por el restaurante, debe ser mayor o igual 0");
+        if (txtNombre.getText().trim().isBlank()) {
+            Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe ingresar el cliente");
             toggleEnableForm();
             return;
         }
 
-        double precio = Double.valueOf(txtPrecio.getText().trim());
-        int tiempo = Integer.valueOf(txtTiempoEMn.getText().trim());
-
         //Como cumplio las validaciones entonces ejecutamos la operación
-        ResultadoOperacion res = controller.add(txtNombre.getText().trim(), txaDescripcion.getText().trim(), precio, tiempo, tipoSeleccionado);
+        ResultadoOperacion res = controller.add(txtNombre.getText().trim(), total, tiempoEstimadoMinutos);
 
         if (res.isExito()) {
             Notifications.getInstance().show(Notifications.Type.SUCCESS, Notifications.Location.TOP_RIGHT, res.getMensaje());
@@ -643,18 +685,13 @@ public class FormPlatos extends javax.swing.JPanel {
         toggleEnableForm();
     }//GEN-LAST:event_btnAddActionPerformed
 
-    private void txtPrecioKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtPrecioKeyTyped
-        //Validamos que solo acepte numero y el punto
-        validaciones.soloNumeros(evt, 5, txtPrecio.getText());
-    }//GEN-LAST:event_txtPrecioKeyTyped
-
     private void txtIngredientesAgrKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtIngredientesAgrKeyTyped
         // TODO add your handling code here:
     }//GEN-LAST:event_txtIngredientesAgrKeyTyped
 
-    private void txtIngredientesLstKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtIngredientesLstKeyTyped
+    private void txtPlatosLstKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtPlatosLstKeyTyped
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtIngredientesLstKeyTyped
+    }//GEN-LAST:event_txtPlatosLstKeyTyped
 
     private void jLabel1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseClicked
         regresarAIndex();
@@ -662,108 +699,114 @@ public class FormPlatos extends javax.swing.JPanel {
 
     private void btnBuscarILstActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarILstActionPerformed
         //Ejecutamos el método de busqueda
-        if (txtIngredientesLst.getText().trim().isBlank()) {
-            cargarTablaIngredientesLst(controller.obtenerIngredientes());
+        if (txtPlatosLst.getText().trim().isBlank()) {
+            cargarTablaPlatosLst(controller.obtenerPlatos());
         } else {
-            cargarTablaIngredientesLst(controller.buscarProductos(txtIngredientesLst.getText()));
+            cargarTablaPlatosLst(controller.buscarPlatos(txtPlatosLst.getText()));
         }
     }//GEN-LAST:event_btnBuscarILstActionPerformed
 
     private void txtCantidadLstKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCantidadLstKeyTyped
-        validaciones.soloNumeros(evt, 1, txtPrecio.getText());
+        validaciones.soloNumeros(evt, 1, txtCantidadLst.getText());
     }//GEN-LAST:event_txtCantidadLstKeyTyped
 
-    private void btnAddIngrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddIngrActionPerformed
-        //Evento para agregar un ingrediente al plato
-        int row = tblIngredientesLst.getSelectedRow();
-        if (row < 0 && idProducto <= 0) {
-            Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe seleccionar un Ingredeiente para añadir");
-            return;
-        } else if (txtCantidadLst.getText().trim().isBlank()) {
-            Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe ingresar la cantidad del ingrediente que usará el plato");
-            return;
-        }
+    private void btnAddPltActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddPltActionPerformed
+        try {
+            //Evento para agregar un ingrediente al plato
+            int row = tblPlatosLst.getSelectedRow();
+            if (row < 0 && idPlato <= 0) {
+                Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe seleccionar un plato para añadir");
+                return;
+            } else if (txtCantidadLst.getText().trim().isBlank()) {
+                Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe ingresar la cantidad del plato que ordenará");
+                return;
+            }
 
-        int cantidad = Integer.valueOf(txtCantidadLst.getText().trim());
+            int cantidad = Integer.valueOf(txtCantidadLst.getText().trim());
 
-        ResultadoOperacion res = controller.addIngrediente(idProducto, cantidad);
-
-        if (res.isExito()) {
-            cargarTablaIngredientesAgr(controller.obtenerIngredientesAgr());
-            Notifications.getInstance().show(Notifications.Type.SUCCESS, Notifications.Location.TOP_RIGHT, res.getMensaje());
-        } else {
-            Notifications.getInstance().show(Notifications.Type.ERROR, Notifications.Location.TOP_RIGHT, res.getMensaje());
-        }
-
-        reiniciarFormPA();
-    }//GEN-LAST:event_btnAddIngrActionPerformed
-
-    private void tblIngredientesLstMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblIngredientesLstMouseClicked
-        //Evento para seleccionar el Ingrediente a agregar
-        int row = tblIngredientesLst.getSelectedRow();
-
-        txtIngredientesLst.setText(tblIngredientesLst.getValueAt(row, 0).toString());
-
-        //Obtenemos el modelo de la tabla
-        InventarioTableModel model = (InventarioTableModel) tblIngredientesLst.getModel();
-        idProducto = model.getIdAt(row);
-    }//GEN-LAST:event_tblIngredientesLstMouseClicked
-
-    private void tblIngredientesAgrMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblIngredientesAgrMouseClicked
-        //Controlamos si da click para eliminar el producto
-        int row = tblIngredientesAgr.getSelectedRow();
-        int column = tblIngredientesAgr.getSelectedColumn();
-
-        if (column == 3) {
-            int idPlatoAEliminar = Integer.valueOf(tblIngredientesAgr.getValueAt(row, 0).toString());
-            ResultadoOperacion res = controller.delIngrediente(idPlatoAEliminar);
+            ResultadoOperacion res = controller.addPlato(idPlato, cantidad);
 
             if (res.isExito()) {
-                cargarTablaIngredientesAgr(controller.obtenerIngredientesAgr());
+                cargarTablaPlatosAgr(controller.obtenerPlatosAgr());
+                Notifications.getInstance().show(Notifications.Type.SUCCESS, Notifications.Location.TOP_RIGHT, res.getMensaje());
+            } else {
+                Notifications.getInstance().show(Notifications.Type.ERROR, Notifications.Location.TOP_RIGHT, res.getMensaje());
+            }
+
+            reiniciarFormPA();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }//GEN-LAST:event_btnAddPltActionPerformed
+
+    private void tblPlatosLstMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblPlatosLstMouseClicked
+        try {
+            //Evento para seleccionar el Ingrediente a agregar
+            int row = tblPlatosLst.getSelectedRow();
+
+            txtPlatosLst.setText(tblPlatosLst.getValueAt(row, 1).toString());
+
+            idPlato = Integer.valueOf(tblPlatosLst.getValueAt(row, 0).toString());
+        }catch(Exception e){
+            
+        }
+    }//GEN-LAST:event_tblPlatosLstMouseClicked
+
+    private void tblPlatosAgrMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblPlatosAgrMouseClicked
+        //Controlamos si da click para eliminar el producto
+        int row = tblPlatosAgr.getSelectedRow();
+        int column = tblPlatosAgr.getSelectedColumn();
+
+        if (column == 4) {
+            int idPlatoAEliminar = Integer.valueOf(tblPlatosAgr.getValueAt(row, 0).toString());
+            int cantidad = Integer.valueOf(tblPlatosAgr.getValueAt(row, 2).toString());
+            ResultadoOperacion res = controller.delPlato(idPlatoAEliminar, cantidad);
+
+            if (res.isExito()) {
+                cargarTablaPlatosAgr(controller.obtenerPlatosAgr());
                 Notifications.getInstance().show(Notifications.Type.SUCCESS, Notifications.Location.TOP_RIGHT, res.getMensaje());
             } else {
                 Notifications.getInstance().show(Notifications.Type.ERROR, Notifications.Location.TOP_RIGHT, res.getMensaje());
             }
         }
-    }//GEN-LAST:event_tblIngredientesAgrMouseClicked
+    }//GEN-LAST:event_tblPlatosAgrMouseClicked
 
-    private void btnBuscarIAgrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarIAgrActionPerformed
-        //Ejecutamos el método de busqueda para los ingredientes añadidos
+    private void btnBuscarPAgrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarPAgrActionPerformed
+        //Ejecutamos el método de busqueda para los platos añadidos
         if (txtIngredientesAgr.getText().trim().isBlank()) {
-            cargarTablaIngredientesAgr(controller.obtenerIngredientesAgr());
+            cargarTablaPlatosAgr(controller.obtenerPlatosAgr());
         } else {
-            cargarTablaIngredientesAgr(controller.buscarIngredientes(txtIngredientesAgr.getText()));
+            cargarTablaPlatosAgr(controller.buscarPlatosAgr(txtIngredientesAgr.getText()));
         }
-    }//GEN-LAST:event_btnBuscarIAgrActionPerformed
+    }//GEN-LAST:event_btnBuscarPAgrActionPerformed
 
     private void btnModActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModActionPerformed
         //Deshabilitamos los botones
         toggleEnableForm();
-        TipoPlato tipoSeleccionado = (TipoPlato) cmbTipoPlato.getSelectedItem();
-        if (tipoSeleccionado.getIdTipoPlato() == -1 || tipoSeleccionado == null) {
-            Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe seleccionar un tipo de plato");
+        Object estadoSeleccionado = cmbEstado.getSelectedItem();
+        if (estadoSeleccionado instanceof String) {
+            Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe seleccionar un estado del pedido");
             toggleEnableForm();
             return;
-        } else if (txtTiempoEMn.getText().trim().isBlank()) {
-            Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe ingresar el tiempo de realización estimado");
-            toggleEnableForm();
-            return;
-        } else if (txtPrecio.getText().trim().isBlank()) {
-            Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "El precio por el restaurante, debe ser mayor o igual 0");
+        } else if (txtNombre.getText().trim().isBlank()) {
+            Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe ingresar el nombre del cliente");
             toggleEnableForm();
             return;
         }
 
-        double precio = Double.valueOf(txtPrecio.getText().trim());
-        int tiempo = Integer.valueOf(txtTiempoEMn.getText().trim());
-
         //Como cumplio las validaciones entonces ejecutamos la operación
-        System.out.println("DEBIDO MODIFICAR");
-        ResultadoOperacion res = controller.mod(txtNombre.getText().trim(), txaDescripcion.getText().trim(), precio, tiempo, tipoSeleccionado);
+        EstadoPedido estado = (EstadoPedido) estadoSeleccionado;
+
+        ResultadoOperacion res = controller.mod(idPedido, txtNombre.getText().trim(), total, tiempoEstimadoMinutos, estado);
 
         if (res.isExito()) {
             Notifications.getInstance().show(Notifications.Type.SUCCESS, Notifications.Location.TOP_RIGHT, res.getMensaje());
             reiniciarFormGeneral();
+
+            if (estado == EstadoPedido.PAGADO) {
+                controller.facturarPedido(idPedido);
+            }
+
             regresarAIndex();
         } else {
             Notifications.getInstance().show(Notifications.Type.ERROR, Notifications.Location.TOP_RIGHT, res.getMensaje());
@@ -773,11 +816,11 @@ public class FormPlatos extends javax.swing.JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdd;
-    private javax.swing.JButton btnAddIngr;
-    private javax.swing.JButton btnBuscarIAgr;
+    private javax.swing.JButton btnAddPlt;
     private javax.swing.JButton btnBuscarILst;
+    private javax.swing.JButton btnBuscarPAgr;
     private javax.swing.JButton btnMod;
-    private javax.swing.JComboBox<String> cmbTipoPlato;
+    private javax.swing.JComboBox<String> cmbEstado;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -789,26 +832,23 @@ public class FormPlatos extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JLabel lb;
     private javax.swing.JLabel lbUser;
-    private javax.swing.JLabel lbUser1;
-    private javax.swing.JLabel lbUser2;
     private javax.swing.JLabel lbUser3;
     private javax.swing.JLabel lbUser4;
+    private javax.swing.JLabel lbUser5;
     public static javax.swing.JLabel lblErrorMsg;
     private javax.swing.JPanel pnlContenedor;
     private javax.swing.JPanel pnlFooter;
-    private javax.swing.JTable tblIngredientesAgr;
-    private javax.swing.JTable tblIngredientesLst;
-    private javax.swing.JTextArea txaDescripcion;
+    private javax.swing.JTable tblPlatosAgr;
+    private javax.swing.JTable tblPlatosLst;
     private javax.swing.JTextField txtCantidadLst;
     private javax.swing.JTextField txtIngredientesAgr;
-    private javax.swing.JTextField txtIngredientesLst;
     private javax.swing.JTextField txtNombre;
-    private javax.swing.JTextField txtPrecio;
+    private javax.swing.JTextField txtPlatosLst;
     private javax.swing.JTextField txtTiempoEMn;
+    private javax.swing.JTextField txtTotal;
     // End of variables declaration//GEN-END:variables
 }

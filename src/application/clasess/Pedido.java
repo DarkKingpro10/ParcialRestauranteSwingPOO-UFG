@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -37,6 +38,7 @@ public class Pedido {
     //Constructor vacio
     public Pedido() {
         this.estadoPedido = EstadoPedido.CREANDOSE;
+        this.platos = new ArrayList<>();
     }
 
     //GETTERS y SETTERS
@@ -157,7 +159,20 @@ public class Pedido {
                     plato.put(pedido, cantidadActual + cantidad);
 
                     //Actualizamos el total del pedido
-                    this.total += pedido.getPrecio() * cantidad;
+                    HashMap<String, Double> promo = Restaurante.consultarDescuento(pedido, cantidad);
+
+                    double promoResta = 0.0;
+                    for (Map.Entry<String, Double> entry : promo.entrySet()) {
+                        promoResta = entry.getValue();
+                    }
+
+                    System.out.println("El descuento a aplicar es de $" + promoResta);
+
+                    //Actualizamos el total del pedido
+                    this.total += ((pedido.getPrecio() * (cantidad+cantidadActual)) + promoResta);
+                    this.tiempoEntregaEstimado += (pedido.getTiempoEstimadoPreparacionMn()*(cantidadActual + cantidad));
+
+                    //this.total += pedido.getPrecio() * cantidad;
                     return new ResultadoOperacion(true, "Cantidad del plato incrementada exitosamente");
                 }
             }
@@ -167,25 +182,49 @@ public class Pedido {
             nuevoPlato.put(pedido, cantidad);
             this.platos.add(nuevoPlato);
 
+            //Obtenemos la promoción
+            HashMap<String, Double> promo = Restaurante.consultarDescuento(pedido, cantidad);
+
+            double promoResta = 0.0;
+            for (Map.Entry<String, Double> entry : promo.entrySet()) {
+                promoResta = entry.getValue();
+            }
+
+            System.out.println("El descuento a aplicar es de $" + promoResta);
+
             //Actualizamos el total del pedido
-            this.total += pedido.getPrecio() * cantidad;
+            this.total += ((pedido.getPrecio() * cantidad) + promoResta);
+            this.tiempoEntregaEstimado += pedido.getTiempoEstimadoPreparacionMn();
 
             return new ResultadoOperacion(true, "Plato agregado exitosamente");
         } catch (Exception e) {
-            return new ResultadoOperacion(false, "No se pudo agregar el plato al pedido");
+            return new ResultadoOperacion(false, "No se pudo agregar el plato al pedido " + e);
         }
     }
 
-    public ResultadoOperacion borrarPlato(Plato platoABorrar) {
+    public ResultadoOperacion borrarPlato(Plato platoABorrar, int cantidad) {
         try {
             for (HashMap<Plato, Integer> plato : this.platos) {
-                if (plato.containsKey(platoABorrar) && (this.estadoPedido == EstadoPedido.CREANDOSE)) {
+                if (plato.containsKey(platoABorrar) && (this.estadoPedido != EstadoPedido.PREPARADO)) {
                     //Restamos el monto de ese plato
                     //Actualizamos la cantidad del mismo en el pedido
                     int cantidadActual = plato.get(platoABorrar);
-                    
-                    this.total -= platoABorrar.getPrecio() * cantidadActual;
+
+                    //Obtenemos la promoción
+                    HashMap<String, Double> promo = Restaurante.consultarDescuento(platoABorrar, cantidad);
+
+                    double promoResta = 0.0;
+                    for (Map.Entry<String, Double> entry : promo.entrySet()) {
+                        promoResta = entry.getValue();
+                    }
+
+                    this.total -= ((platoABorrar.getPrecio() * cantidadActual) + promoResta);
+                    System.out.println(platoABorrar.getTiempoEstimadoPreparacionMn());
+                    this.tiempoEntregaEstimado -= (platoABorrar.getTiempoEstimadoPreparacionMn()*cantidadActual);
+                    this.platos.remove(plato);
                     return new ResultadoOperacion(true, "Plato eliminado exitosamente.");
+                } else {
+                    return new ResultadoOperacion(false, "Si el pedido ya se realizo no se puede eliminar el plato");
                 }
             }
 
@@ -194,16 +233,16 @@ public class Pedido {
             return new ResultadoOperacion(false, "Plato no se borro.");
         }
     }
-    
+
     //Método para facturar (Cambiar el estado del pedido)
-    public ResultadoOperacion facturar(){
+    public ResultadoOperacion facturar() {
         this.setEstadoPedido(EstadoPedido.PAGADO);
-        
+
         return new ResultadoOperacion(true, "Se facturo el pedido");
     }
-    
+
     //Método para obtener la fecha en formato correto
-    public String getFechaFormateada(){
+    public String getFechaFormateada() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         return this.fechaPedido.format(formatter);
     }

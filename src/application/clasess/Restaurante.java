@@ -32,6 +32,7 @@ public class Restaurante {
     }
 
     public static List<Pedido> getPedidos() {
+        System.out.println(pedidos.size());
         return pedidos;
     }
 
@@ -217,10 +218,13 @@ public class Restaurante {
     //Método para buscar un producto y retornarlo
     public static Producto buscarProducto(String nombre) {
         nombre = nombre.trim().toLowerCase();
-        for (Producto producto : inventario) {
-            if (producto.getNombreProducto().toLowerCase().equals(nombre)) {
-                return producto;
+        try {
+            for (Producto producto : inventario) {
+                if (producto.getNombreProducto().toLowerCase().equals(nombre)) {
+                    return producto;
+                }
             }
+        } catch (Exception e) {
         }
 
         return null;
@@ -228,12 +232,15 @@ public class Restaurante {
 
     ////Método para buscar un producto y retornarlo
     public static Producto buscarProducto(int id) {
-        for (Producto producto : inventario) {
-            if (producto.getIdProducto() == id && !producto.fueBorrado()) {
-                return producto;
+        try {
+            for (Producto producto : inventario) {
+                if (producto.getIdProducto() == id && !producto.fueBorrado()) {
+                    return producto;
+                }
             }
+        } catch (Exception e) {
+            System.out.println(e);
         }
-
         return null;
     }
 
@@ -674,6 +681,26 @@ public class Restaurante {
         return coincidencias;
     }
 
+    /**
+     * Método para buscar un plato que este disponible para ordenar
+     *
+     * @param query representa la coincidencia a buscar
+     * @return objeto de tipo Plato
+     */
+    public static List<Plato> buscarPlatosDisponibles(String query) {
+        //Recorremos la lista para buscar
+        query = query.trim().toLowerCase();
+        List<Plato> coincidencias = new ArrayList<>();
+
+        for (Plato plato : platos) {
+            if (plato.getNombrePlato().toLowerCase().contains(query) && plato.isDisponibilidad() && plato.disponibilidadIngredientes()) {
+                coincidencias.add(plato);
+            }
+        }
+
+        return coincidencias;
+    }
+
     //Método para buscar un plato
     public static Plato buscarPlato(int id) {
         for (Plato plato : platos) {
@@ -740,6 +767,7 @@ public class Restaurante {
      * @return objeto de tipo {ResultadoOperacion}
      */
     public static ResultadoOperacion modificarPedido(int id, Pedido pedido) {
+        System.out.println("DEBIO MODIFICAR");
         try {
             if (pedido.getCliente().trim().isEmpty()) {
                 return new ResultadoOperacion(false, "El nombre cliente no puede estar vacio");
@@ -810,7 +838,8 @@ public class Restaurante {
                     coincidencias.add(pedido);
                     continue;
                 }
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
 
             if (pedido.getCliente().toLowerCase().contains(query)) {
                 coincidencias.add(pedido);
@@ -845,7 +874,7 @@ public class Restaurante {
     //Método para buscar un pedido
     public static Pedido buscarPedio(int id) {
         try {
-            return pedidos.get(id-1);
+            return pedidos.get(id - 1);
         } catch (Exception e) {
             return null;
         }
@@ -854,7 +883,7 @@ public class Restaurante {
     //Método para facturar un pedido
     public static ResultadoOperacion facturar(int id) {
         try {
-            Pedido pedido = pedidos.get(id);
+            Pedido pedido = pedidos.get(id-1);
             pedido.setEstadoPedido(EstadoPedido.PAGADO);
             return new ResultadoOperacion(true, "Se facturo con exito $" + pedido.getTotal() + " del pedido #" + pedido.getIdPedido());
         } catch (Exception e) {
@@ -863,14 +892,18 @@ public class Restaurante {
     }
 
     //Método para obtener el descuento de un plato si la cantidad de este corresponde a alguna promoción
-    public static double consultarDescuento(Plato plato, int cantidad) {
+    public static HashMap<String, Double> consultarDescuento(Plato plato, int cantidad) {
+        HashMap<String, Double> promoEncontrada = new HashMap<>();
         for (Promocion promo : promociones) {
-            if (promo.getPlato().equals(plato) && promo.getPlatosMinimos() >= cantidad) {
-                return (promo.getPlato().getPrecio() * (promo.getPorcentajeDescuento() / 100) * -1);
+            if (promo.getPlato().equals(plato) && cantidad >= promo.getPlatosMinimos()) {
+                double descuento = ((promo.getPlato().getPrecio() * promo.getPorcentajeDescuento()) /100) * -1;
+                promoEncontrada.put(promo.getNombrePromocion(), descuento);
+                return promoEncontrada;
             }
         }
 
-        return 0;
+        promoEncontrada.put("", 0.0);
+        return promoEncontrada;
     }
 
     //Método para obtener el plato más vendido

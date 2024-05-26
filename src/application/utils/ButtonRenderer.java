@@ -1,4 +1,3 @@
-
 package application.utils;
 
 import java.awt.Color;
@@ -15,6 +14,7 @@ import raven.application.Application;
  * @author Jesus Esquivel
  */
 public class ButtonRenderer extends JButton implements TableCellRenderer {
+
     public ButtonRenderer(Color color, ImageIcon icon, String tooltip) {
         setOpaque(true);
         setBackground(color);
@@ -26,7 +26,19 @@ public class ButtonRenderer extends JButton implements TableCellRenderer {
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        setText((value == null) ? "" : value.toString());
+        try {
+            setText((value == null) ? "" : value.toString());
+
+            if (table.getValueAt(row, 0) != null && !table.getValueAt(row, 0).toString().isEmpty()) {
+                setText((value == null) ? "" : value.toString());
+                return this;
+            } else {
+                return null; // No renderizar nada para filas de descuento
+            }
+        } catch (Exception e) {
+
+        }
+        
         return this;
     }
 }

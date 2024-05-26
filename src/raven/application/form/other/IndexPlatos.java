@@ -58,7 +58,7 @@ public class IndexPlatos extends javax.swing.JPanel {
         tblPlatos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         tblPlatos.getColumnModel().getColumn(5).setCellRenderer(new ButtonRenderer(Color.BLACK, iconDetalle, "Visualizar Detalle del plato"));
-        tblPlatos.getColumnModel().getColumn(5).setCellEditor(new ButtonEditor(new JCheckBox(), tblPlatos));
+        tblPlatos.getColumnModel().getColumn(5).setCellEditor(new ButtonEditor(new JCheckBox(), tblPlatos, Color.BLACK, iconDetalle, "Visualizar Detalle del plato"));
     }
 
     void reiniciarForm() {

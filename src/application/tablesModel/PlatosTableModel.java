@@ -32,7 +32,7 @@ public class PlatosTableModel extends AbstractTableModel {
             case 1:
                 return plato.getDescripcion();
             case 2:
-                return plato.getPrecio();
+                return "$"+Math.round(plato.getPrecio() * 100.0) / 100.0;
             case 3:
                 return plato.getTiempoEstimadoPreparacionMn();
             case 4:
