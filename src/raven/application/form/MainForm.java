@@ -87,7 +87,9 @@ public class MainForm extends JLayeredPane {
                 Application.showForm(new IndexPromociones());
             } else if (index == 5) {
                 Application.showForm(new IndexTiposPlato());
-            }  else if (index == 7) {
+            } else if (index == 6) {
+                Application.showForm(new FormInbox());
+            } else if (index == 7) {
                 Application.logout();
             } else {
                 action.cancel();
