@@ -313,6 +313,10 @@ public class IndexTiposPlato extends javax.swing.JPanel {
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnDelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDelActionPerformed
+        //Consulatomos si desea continuar
+        if(!validaciones.confirmarAccion("¿Está seguro que desea eliminar este tipo de plato?", "Confirmar eliminación del plato "+txtTipo.getText())){
+            return;
+        }
         //Eliminar el tipo plato
         toggleEnableForm();
         int row = tblTipos.getSelectedRow();
@@ -344,6 +348,10 @@ public class IndexTiposPlato extends javax.swing.JPanel {
     }//GEN-LAST:event_tblTiposMouseClicked
 
     private void btnModActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModActionPerformed
+        //Consulatomos si desea continuar
+        if(!validaciones.confirmarAccion("¿Está seguro que desea modificar el tipo de plato?", "Confirmar modificación del tipo de plato "+txtTipo.getText())){
+            return;
+        }
         //Modificar el tipo de plato
         toggleEnableForm(); //Deshabilitamos los botones
         int row = tblTipos.getSelectedRow(); //Obtenemos la fila seleccionada

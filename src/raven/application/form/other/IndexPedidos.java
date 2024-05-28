@@ -9,6 +9,7 @@ import application.utils.ButtonEditor;
 import application.utils.CentrarColumnas;
 import application.utils.ButtonRenderer;
 import application.utils.ResultadoOperacion;
+import application.utils.Validaciones;
 import com.formdev.flatlaf.FlatClientProperties;
 import java.awt.Color;
 import java.util.ArrayList;
@@ -39,7 +40,8 @@ public class IndexPedidos extends javax.swing.JPanel {
     private JTable tablaDetalle;
     ImageIcon iconDetalle = new ImageIcon(Application.class.getResource("/raven/icon/png/view-icon.png"));
     public static Object estado = "Todo";
-
+    Validaciones validaciones = new Validaciones();
+    
     public IndexPedidos() {
         initComponents();
         inicializarCampos();
@@ -329,6 +331,11 @@ public class IndexPedidos extends javax.swing.JPanel {
 
     private void btnDelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDelActionPerformed
         toggleEnableForm();
+        //Consulatomos si desea continuar
+        if(!validaciones.confirmarAccion("¿Está seguro que dar por finalizado este pedido?", "Confirmar modificación del pedido #"+idPedido)){
+            return;
+        }
+        
         int row = tblPedidos.getSelectedRow();
         System.out.println(row + " " + idPedido);
         if (row != -1 && idPedido > 0) {

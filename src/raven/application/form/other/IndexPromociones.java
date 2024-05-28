@@ -421,6 +421,10 @@ public class IndexPromociones extends javax.swing.JPanel {
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnDelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDelActionPerformed
+        //Consulatomos si desea continuar
+        if(!validaciones.confirmarAccion("¿Está seguro que desea eliminar esta promoción?", "Confirmar eliminación de la promoción"+txtNombre.getText())){
+            return;
+        }
         //Eliminar el tipo plato
         toggleEnableForm();
         int row = tblPromociones.getSelectedRow();
@@ -464,6 +468,11 @@ public class IndexPromociones extends javax.swing.JPanel {
     }//GEN-LAST:event_tblPromocionesMouseClicked
 
     private void btnModActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModActionPerformed
+        //Consulatomos si desea continuar
+        if(!validaciones.confirmarAccion("¿Está seguro que desea modificar esta promoción?", "Confirmar modificación de la promoción "+txtNombre.getText())){
+            return;
+        }
+        
         //Eliminar el tipo plato
         toggleEnableForm();
         int row = tblPromociones.getSelectedRow();

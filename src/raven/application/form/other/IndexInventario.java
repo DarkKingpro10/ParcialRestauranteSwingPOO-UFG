@@ -412,6 +412,10 @@ public class IndexInventario extends javax.swing.JPanel {
 
     private void tblProductosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblProductosMouseClicked
         //Llenamos el formulario
+        //Consulatomos si desea continuar
+        if(!validaciones.confirmarAccion("¿Está seguro que desea eliminar este producto/ingrediente?", "Confirmar eliminación del producto "+txtNombre.getText())){
+            return;
+        }
         int row = tblProductos.getSelectedRow();
         txtNombre.setText(tblProductos.getValueAt(row, 0).toString());
         //Obtenemos el modelo de la tabla
@@ -421,6 +425,11 @@ public class IndexInventario extends javax.swing.JPanel {
     }//GEN-LAST:event_tblProductosMouseClicked
 
     private void btnModActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModActionPerformed
+        //Consulatomos si desea continuar
+        if(!validaciones.confirmarAccion("¿Está seguro que desea modificar este producto?", "Confirmar modificación del producto"+txtNombre.getText())){
+            return;
+        }
+
         //Modificar el tipo de plato
         toggleEnableForm(); //Deshabilitamos los botones
         int row = tblProductos.getSelectedRow(); //Obtenemos la fila seleccionada

@@ -676,13 +676,14 @@ public class FormPlatos extends javax.swing.JPanel {
     private void btnAddIngrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddIngrActionPerformed
         //Evento para agregar un ingrediente al plato
         int row = tblIngredientesLst.getSelectedRow();
-        if (row < 0 && idProducto <= 0) {
+        System.out.println("El id del producto es"+idProducto);
+        if (row < 0 || idProducto <= 0) {
             Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe seleccionar un Ingredeiente para añadir");
             return;
         } else if (txtCantidadLst.getText().trim().isBlank()) {
             Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe ingresar la cantidad del ingrediente que usará el plato");
             return;
-        } else if(txtCantidadLst.getText().trim().isBlank()){
+        } else if(txtCantidadLst.getText().trim().isBlank() || idProducto == 0){
             Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Vuelva a seleccionar el plato");
             return;
         }
@@ -740,6 +741,10 @@ public class FormPlatos extends javax.swing.JPanel {
     }//GEN-LAST:event_btnBuscarIAgrActionPerformed
 
     private void btnModActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModActionPerformed
+        //Consulatomos si desea continuar
+        if(!validaciones.confirmarAccion("¿Está seguro que desea modificar este plato?", "Confirmar modificación del plato "+txtNombre.getText())){
+            return;
+        }
         //Deshabilitamos los botones
         toggleEnableForm();
         TipoPlato tipoSeleccionado = (TipoPlato) cmbTipoPlato.getSelectedItem();

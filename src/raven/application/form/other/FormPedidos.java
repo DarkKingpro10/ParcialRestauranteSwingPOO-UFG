@@ -3,10 +3,8 @@ package raven.application.form.other;
 import application.clasess.Pedido;
 import application.clasess.Plato;
 import application.clasess.Restaurante;
-import application.clasess.TipoPlato;
 import application.controllers.PedidosController;
 import application.enums.EstadoPedido;
-import application.tablesModel.InventarioTableModel;
 import application.utils.ButtonEditor;
 import application.utils.ButtonRenderer;
 import application.utils.CentrarColumnas;
@@ -712,8 +710,8 @@ public class FormPedidos extends javax.swing.JPanel {
         try {
             //Evento para agregar un ingrediente al plato
             int row = tblPlatosLst.getSelectedRow();
-            if (row < 0 && idPlato <= 0) {
-                Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe seleccionar un plato para añadir");
+            if (row < 0 || idPlato <= 0) {
+                Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe seleccionar un plato para añadir\nPor favor vuelva a seleccionarlo");
                 return;
             } else if (txtCantidadLst.getText().trim().isBlank()) {
                 Notifications.getInstance().show(Notifications.Type.WARNING, Notifications.Location.TOP_RIGHT, "Debe ingresar la cantidad del plato que ordenará");
@@ -745,8 +743,8 @@ public class FormPedidos extends javax.swing.JPanel {
             txtPlatosLst.setText(tblPlatosLst.getValueAt(row, 1).toString());
 
             idPlato = Integer.valueOf(tblPlatosLst.getValueAt(row, 0).toString());
-        }catch(Exception e){
-            
+        } catch (Exception e) {
+
         }
     }//GEN-LAST:event_tblPlatosLstMouseClicked
 
@@ -780,6 +778,11 @@ public class FormPedidos extends javax.swing.JPanel {
 
     private void btnModActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModActionPerformed
         //Deshabilitamos los botones
+        //Consulatomos si desea continuar
+        if(!validaciones.confirmarAccion("¿Está seguro que desea modificar este pedido?", "Confirmar modificación del pedido #"+idPedido)){
+            return;
+        }
+        
         toggleEnableForm();
         Object estadoSeleccionado = cmbEstado.getSelectedItem();
         if (estadoSeleccionado instanceof String) {

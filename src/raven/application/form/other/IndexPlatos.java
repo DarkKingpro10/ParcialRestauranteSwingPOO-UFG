@@ -8,6 +8,7 @@ import application.utils.ButtonEditor;
 import application.utils.CentrarColumnas;
 import application.utils.ButtonRenderer;
 import application.utils.ResultadoOperacion;
+import application.utils.Validaciones;
 import com.formdev.flatlaf.FlatClientProperties;
 import java.awt.Color;
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public class IndexPlatos extends javax.swing.JPanel {
     Plato platoSeleccionado;
     private JTable tablaDetalle;
     ImageIcon iconDetalle = new ImageIcon(Application.class.getResource("/raven/icon/png/view-icon.png"));
-
+    Validaciones validaciones = new Validaciones();
     public IndexPlatos() {
         initComponents();
         inicializarCampos();
@@ -277,6 +278,10 @@ public class IndexPlatos extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnDelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDelActionPerformed
+        //Consulatomos si desea continuar
+        if(!validaciones.confirmarAccion("¿Está seguro que desea eliminar este plato?", "Confirmar eliminación del plato")){
+            return;
+        }
         toggleEnableForm();
         int row = tblPlatos.getSelectedRow();
         System.out.println(row + " " + idPlato);

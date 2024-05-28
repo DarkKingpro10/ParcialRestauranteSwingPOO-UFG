@@ -16,7 +16,6 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.table.DefaultTableModel;
 import raven.application.Application;
 import raven.application.form.other.IndexPedidos;
-import raven.application.form.other.IndexPlatos;
 import raven.toast.Notifications;
 
 /**
@@ -280,13 +279,25 @@ public class PedidosController {
      * @return ResultadoOperacion
      */
     public ResultadoOperacion mod(int idPedido, String nombre, double total, int tiempo, EstadoPedido estado) {
+        
         pedido.setCliente(nombre);
         pedido.setEstadoPedido(estado);
 
         ResultadoOperacion res = Restaurante.modificarPedido(idPedido, pedido);
-
+        
         //Evaluamos si fue exitoso
         if (res.isExito()) {
+            
+            //Si se cancela entonces debemos reingresar los ingredientes
+            /**
+             * Pensandolo mejor esta opción se elimina puesto que puede que ya se halla preparado uno de los platos, por ende 
+             * se tomará en cuenta que el empleado debería de modificar la cantidad del producto manualmente en el formulario
+             * de Inventario añadiendo o eliminando solo aquellos productos que no se usaron
+             */
+            /*if(estado == EstadoPedido.CANCELADO){
+                this.platosEliminados = this.pedido.getPlatos();
+            }*/
+            
             restoreInventario();
             actualizarInventario();
         }

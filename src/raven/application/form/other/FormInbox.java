@@ -2,7 +2,6 @@ package raven.application.form.other;
 
 import application.clasess.Plato;
 import application.clasess.Restaurante;
-import com.formdev.flatlaf.FlatClientProperties;
 
 /**
  *
@@ -55,7 +54,7 @@ public class FormInbox extends javax.swing.JPanel {
         lblPlato.setFont(new java.awt.Font("Segoe UI", 3, 36)); // NOI18N
         lblPlato.setForeground(new java.awt.Color(0, 218, 6));
         lblPlato.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblPlato.setText("NInguno");
+        lblPlato.setText("Ninguno");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);

@@ -7,6 +7,7 @@ import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.KeyStroke;
 import java.awt.event.KeyEvent;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -263,5 +264,26 @@ public class Validaciones {
                 evt.consume();
             }
         }
+    }
+    
+    /**
+     * Método para obtener la confirmación de una acción 
+     * @param mensaje El mensaje que 
+     * @param titulo
+     * @return 
+     */
+    public boolean confirmarAccion(String mensaje, String titulo) {
+        Object[] opciones = {"Sí", "No"};
+        int confirmacion = JOptionPane.showOptionDialog(
+            null,
+            mensaje,
+            titulo,
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            opciones,
+            opciones[0]
+        );
+        return confirmacion == JOptionPane.YES_OPTION;
     }
 }
